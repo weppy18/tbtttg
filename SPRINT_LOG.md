@@ -17,3 +17,4 @@
 | 1h15m | Play-test suite green (no bugs found). NEVER-DONE #2: axe-core accessibility audit |
 | 1h14m | axe audit green. NEVER-DONE #3: bundle-size report + memoised leaf components |
 | 1h16m | Bundle report committed. NEVER-DONE #4: daily challenge (seeded puzzle of the day) |
+| 1h26m | Daily puzzle committed. NEVER-DONE #5: tournament mode (best-of-N, alternating first player, series scoreboard) |

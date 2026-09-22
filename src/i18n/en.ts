@@ -169,6 +169,17 @@ export const en = {
   'tour.tools.body':
     'Stuck? Press H for a hint. After a game, analyse it to see your mistakes, share it by link, or watch the replay.',
 
+  // Series
+  'series.title': 'Series',
+  'series.bestOf': 'Best of {n}',
+  'series.game': 'Game {n}',
+  'series.end': 'End series',
+  'series.firstTo': 'First to {n} wins. Sides swap every game. Draws: {draws}.',
+  'series.finished': 'Series over.',
+  'series.won': '{player} wins the series {a}–{b}!',
+  'series.nextGame': 'Next game',
+  'series.again': 'New series',
+
   // Puzzle
   'puzzle.title': 'Puzzle',
   'puzzle.daily': 'Daily puzzle',

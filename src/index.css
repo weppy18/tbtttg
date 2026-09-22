@@ -1009,3 +1009,28 @@ button {
   text-transform: uppercase;
   color: var(--muted);
 }
+
+/* ---------- Series ---------- */
+.controls--start {
+  justify-content: flex-start;
+}
+.series__score {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 1.1rem;
+  margin: 4px 0 6px;
+}
+.series__num {
+  font-size: 1.6rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.series__name {
+  font-weight: 700;
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

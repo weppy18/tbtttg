@@ -8,9 +8,10 @@ import {
   canRedo,
   canUndo,
   currentGame,
-  difficultyFor,
   initialMatch,
   isAiSide,
+  isSwapped,
+  matchDifficulty,
   matchReducer,
   parseConfig,
   type MatchConfig,
@@ -34,6 +35,10 @@ export interface MatchApi {
   jump: (cursor: number) => void;
   newGame: (config?: Partial<MatchConfig>) => void;
   load: (config: MatchConfig, moves: readonly number[], cursor?: number) => void;
+  startSeries: (bestOf: number) => void;
+  endSeries: () => void;
+  /** True in odd series games, when participants have swapped marks. */
+  swapped: boolean;
 }
 
 /** Delay before the AI answers, so moves feel considered rather than instant. */
@@ -68,6 +73,7 @@ export function useMatch(onGameOver?: (config: MatchConfig, game: AnyGame) => vo
 
   const live = match.cursor === match.moves.length;
   const aiTurn = live && game.status === 'playing' && isAiSide(match.config, game.toMove);
+  const difficulty = matchDifficulty(match, game.toMove);
 
   // Schedule the AI's reply. Cancelled if anything about the position changes first.
   useEffect(() => {
@@ -76,11 +82,7 @@ export function useMatch(onGameOver?: (config: MatchConfig, game: AnyGame) => vo
     let cancelRequest: (() => void) | null = null;
     const moves = match.moves.slice(0, match.cursor);
     const timer = setTimeout(() => {
-      const req = requestMove(
-        match.config.variant,
-        moves,
-        difficultyFor(match.config, game.toMove),
-      );
+      const req = requestMove(match.config.variant, moves, difficulty);
       cancelRequest = req.cancel;
       void req.promise.then((index) => {
         if (!cancelled) dispatch({ type: 'play', index });
@@ -91,7 +93,7 @@ export function useMatch(onGameOver?: (config: MatchConfig, game: AnyGame) => vo
       clearTimeout(timer);
       cancelRequest?.();
     };
-  }, [aiTurn, match.moves, match.cursor, match.config, match.gameId, game.toMove]);
+  }, [aiTurn, match.moves, match.cursor, match.config, match.gameId, game.toMove, difficulty]);
 
   // Record the first result of each game exactly once (undoing a loss doesn't erase it).
   const recorded = useRef(-1);
@@ -120,9 +122,18 @@ export function useMatch(onGameOver?: (config: MatchConfig, game: AnyGame) => vo
     [],
   );
 
+  const startSeries = useCallback(
+    (bestOf: number) => dispatch({ type: 'startSeries', bestOf }),
+    [],
+  );
+  const endSeries = useCallback(() => dispatch({ type: 'endSeries' }), []);
+
   return {
     match,
     game,
+    startSeries,
+    endSeries,
+    swapped: isSwapped(match),
     aiThinking: aiTurn,
     humanTurn: game.status === 'playing' && !isAiSide(match.config, game.toMove),
     viewingHistory: !live,

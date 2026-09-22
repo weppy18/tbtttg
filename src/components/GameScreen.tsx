@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import {
   globalRowCol,
   other,
@@ -9,7 +9,7 @@ import {
 } from '../engine/index.ts';
 import { useAnalysis } from '../hooks/useAnalysis.ts';
 import { useAnnouncer } from '../hooks/useAnnouncer.ts';
-import { useMatch } from '../hooks/useMatch.ts';
+import { useMatch, type MatchApi } from '../hooks/useMatch.ts';
 import { usePersistedState } from '../hooks/usePersistedState.ts';
 import { useT } from '../i18n/index.ts';
 import { shareUrl } from '../lib/share.ts';
@@ -27,7 +27,9 @@ import { MoveHistory } from './MoveHistory.tsx';
 import { Scoreboard } from './Scoreboard.tsx';
 import { SetupPanel } from './SetupPanel.tsx';
 import { PlayersPanel } from './PlayersPanel.tsx';
-import { useProfiles } from '../state/profilesContext.ts';
+import { SwapContext, useEffectiveProfile } from '../state/swapContext.ts';
+import { SeriesPanel } from './SeriesPanel.tsx';
+import { seatOf, seriesWinner, type MatchState } from '../state/match.ts';
 import type { Player } from '../engine/index.ts';
 
 const CONFETTI_COLORS = ['#38bdf8', '#fb7185', '#fbbf24', '#34d399', '#a78bfa'];
@@ -53,16 +55,31 @@ function describeMove(game: AnyGame, move: number): MoveDescription {
 /** Display name for a side: the profile name, "AI" for AI sides, else the letter. */
 function useNames(config: MatchConfig): (player: Player) => string {
   const t = useT();
-  const { profiles } = useProfiles();
+  const profile = useEffectiveProfile();
   return useCallback(
     (player: Player) => {
       if (isAiSide(config, player)) {
         return config.mode === 'ava' ? `${t('players.ai')} ${player}` : t('players.ai');
       }
-      return profiles[player].name || player;
+      return profile(player).name || player;
     },
-    [config, profiles, t],
+    [config, profile, t],
   );
+}
+
+/** Series-level status once a best-of-N is decided. */
+function useSeriesStatus(match: MatchState, name: (p: Player) => string): string | null {
+  const t = useT();
+  if (!match.series) return null;
+  const winner = seriesWinner(match.series);
+  if (!winner) return null;
+  const player: Player = seatOf(match, 'X') === winner ? 'X' : 'O';
+  const { wins } = match.series;
+  return t('series.won', {
+    player: name(player),
+    a: wins[winner],
+    b: wins[winner === 'A' ? 'B' : 'A'],
+  });
 }
 
 function useStatus(config: MatchConfig, game: AnyGame, aiThinking: boolean): string {
@@ -86,17 +103,36 @@ function useStatus(config: MatchConfig, game: AnyGame, aiThinking: boolean): str
 }
 
 export function GameScreen() {
-  const t = useT();
   const [stats, setStats] = usePersistedState<Stats>('stats', {}, parseStats);
   const onGameOver = useCallback(
     (config: MatchConfig, game: AnyGame) => setStats((s) => recordGame(s, config, game)),
     [setStats],
   );
   const m = useMatch(onGameOver);
+  return (
+    <SwapContext.Provider value={m.swapped}>
+      <GameScreenInner m={m} stats={stats} resetStats={() => setStats({})} />
+    </SwapContext.Provider>
+  );
+}
+
+function GameScreenInner({
+  m,
+  stats,
+  resetStats,
+}: {
+  m: MatchApi;
+  stats: Stats;
+  resetStats: () => void;
+}) {
+  const t = useT();
   const { match, game, undo, redo, newGame } = m;
   const { announce, message, nonce } = useAnnouncer();
-  const status = useStatus(match.config, game, m.aiThinking);
   const name = useNames(match.config);
+  const gameStatus = useStatus(match.config, game, m.aiThinking);
+  const seriesStatus = useSeriesStatus(match, name);
+  const status = seriesStatus ?? gameStatus;
+  const seriesOver = seriesStatus !== null;
   const { hint, requestHint, analysis, analysing, analyse } = useAnalysis(
     match.config.variant,
     match.gameId,
@@ -217,6 +253,11 @@ export function GameScreen() {
   const variantName = t(`variant.${match.config.variant}`);
   const over = game.status !== 'playing';
   const finished = finalGame.status !== 'playing';
+  const profile = useEffectiveProfile();
+  const colours = {
+    ...(profile('X').color ? { '--x': profile('X').color } : {}),
+    ...(profile('O').color ? { '--o': profile('O').color } : {}),
+  } as CSSProperties;
 
   const replayer = useReplay(match.gameId, match.moves.length, m.jump);
   const [copied, setCopied] = useState(false);
@@ -241,7 +282,7 @@ export function GameScreen() {
   };
 
   return (
-    <div className="game">
+    <div className="game" style={colours}>
       <LiveAnnouncer message={message} nonce={nonce} />
       <section className="game__main" aria-label={variantName}>
         <p className={`status status--${game.status}`} data-testid="status">
@@ -281,10 +322,30 @@ export function GameScreen() {
           <Confetti burst={burst} colors={CONFETTI_COLORS} />
         </div>
         <div className="controls" role="toolbar" aria-label={t('action.settings')}>
-          <button type="button" className="btn" onClick={() => m.newGame()} data-testid="new-game">
-            {over ? t('action.playAgain') : t('action.newGame')}
-          </button>
-          {over && match.config.mode === 'hva' && (
+          {seriesOver ? (
+            <button
+              type="button"
+              className="btn"
+              onClick={() => m.startSeries(match.series!.bestOf)}
+              data-testid="new-game"
+            >
+              {t('series.again')}
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn"
+              onClick={() => m.newGame()}
+              data-testid="new-game"
+            >
+              {over
+                ? match.series
+                  ? t('series.nextGame')
+                  : t('action.playAgain')
+                : t('action.newGame')}
+            </button>
+          )}
+          {over && match.config.mode === 'hva' && !match.series && (
             <button
               type="button"
               className="btn btn--ghost"
@@ -360,8 +421,11 @@ export function GameScreen() {
       </section>
       <aside className="game__side">
         <SetupPanel config={match.config} onChange={(patch) => m.newGame(patch)} />
-        <Scoreboard stats={stats} config={match.config} onReset={() => setStats({})} />
-        <PlayersPanel />
+        <SeriesPanel match={match} name={name} onStart={m.startSeries} onEnd={m.endSeries} />
+        <Scoreboard stats={stats} config={match.config} onReset={resetStats} />
+        <SwapContext.Provider value={false}>
+          <PlayersPanel />
+        </SwapContext.Provider>
         <MoveHistory
           moves={match.moves}
           cursor={match.cursor}

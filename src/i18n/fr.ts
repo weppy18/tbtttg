@@ -159,6 +159,17 @@ export const fr: Record<MessageKey, string> = {
   'tour.tools.body':
     'Bloqué ? Appuyez sur H pour un indice. Après une partie, analysez-la pour voir vos erreurs, partagez-la par lien ou regardez la relecture.',
 
+  'series.title': 'Série',
+  'series.bestOf': 'Meilleur des {n}',
+  'series.game': 'Partie {n}',
+  'series.end': 'Terminer la série',
+  'series.firstTo':
+    "Premier à {n} victoires. Les côtés s'échangent à chaque partie. Nuls : {draws}.",
+  'series.finished': 'Série terminée.',
+  'series.won': '{player} remporte la série {a}–{b} !',
+  'series.nextGame': 'Partie suivante',
+  'series.again': 'Nouvelle série',
+
   'puzzle.title': 'Casse-tête',
   'puzzle.daily': 'Casse-tête du jour',
   'puzzle.practice': "Casse-tête d'entraînement",

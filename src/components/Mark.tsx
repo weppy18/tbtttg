@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import type { Player } from '../engine/index.ts';
 import { isStrokeMark } from '../state/profiles.ts';
-import { useProfiles } from '../state/profilesContext.ts';
+import { useEffectiveProfile } from '../state/swapContext.ts';
 
 interface Props {
   player: Player;
@@ -14,8 +14,7 @@ interface Props {
  * crisply, or the player's chosen glyph (emoji/text) rendered as text.
  */
 export const Mark = memo(function Mark({ player, animate = false }: Props) {
-  const { profiles } = useProfiles();
-  const glyph = profiles[player].mark;
+  const glyph = useEffectiveProfile()(player).mark;
   const cls = `mark mark--${player.toLowerCase()}${animate ? ' mark--enter' : ''}`;
   if (!isStrokeMark(glyph)) {
     return (

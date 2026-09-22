@@ -7,10 +7,15 @@ import {
   difficultyFor,
   initialMatch,
   isAiSide,
+  isSwapped,
+  matchDifficulty,
   matchReducer,
   parseConfig,
   redoTarget,
+  seatOf,
+  seriesWinner,
   undoTarget,
+  winsNeeded,
   type MatchConfig,
   type MatchState,
 } from './match.ts';
@@ -166,5 +171,80 @@ describe('config helpers', () => {
     expect(parseConfig({ ...DEFAULT_CONFIG, humanSide: 'Z' })).toBeNull();
     expect(parseConfig({ ...DEFAULT_CONFIG, difficulty: 'ultra' })).toBeNull();
     expect(parseConfig({ ...DEFAULT_CONFIG, difficultyO: 'ultra' })).toBeNull();
+  });
+});
+
+describe('series (best-of-N)', () => {
+  const X_WIN = [0, 3, 1, 4, 2];
+  const O_WIN = [1, 0, 2, 3, 4, 6];
+  const DRAW = [0, 1, 2, 4, 3, 5, 7, 6, 8];
+
+  it('counts wins by seat, swaps seats every game, and ends at a majority', () => {
+    let m = matchReducer(initialMatch(HVH), { type: 'startSeries', bestOf: 3 });
+    expect(m.series).toEqual({
+      bestOf: 3,
+      game: 0,
+      wins: { A: 0, B: 0 },
+      draws: 0,
+      recorded: false,
+    });
+    expect(isSwapped(m)).toBe(false);
+    expect(seatOf(m, 'X')).toBe('A');
+    m = play(m, ...X_WIN); // A (as X) wins game 1
+    expect(m.series?.wins).toEqual({ A: 1, B: 0 });
+    expect(m.series?.recorded).toBe(true);
+    m = matchReducer(m, { type: 'newGame' });
+    expect(m.series?.game).toBe(1);
+    expect(isSwapped(m)).toBe(true);
+    expect(seatOf(m, 'X')).toBe('B');
+    expect(m.moves).toEqual([]);
+    m = play(m, ...DRAW);
+    expect(m.series?.draws).toBe(1);
+    m = matchReducer(m, { type: 'newGame' });
+    expect(m.series?.game).toBe(2);
+    m = play(m, ...X_WIN); // game 3: X is seat A again -> A has 2 = majority
+    expect(m.series?.wins).toEqual({ A: 2, B: 0 });
+    expect(seriesWinner(m.series!)).toBe('A');
+    // "new game" inside a finished series keeps the final board
+    const after = matchReducer(m, { type: 'newGame' });
+    expect(after.moves).toEqual(X_WIN);
+    expect(after.series?.game).toBe(2);
+    // changing the setup ends the series
+    expect(matchReducer(m, { type: 'newGame', config: { variant: 'four' } }).series).toBeNull();
+    expect(matchReducer(m, { type: 'endSeries' }).series).toBeNull();
+    const casual = initialMatch(HVH);
+    expect(matchReducer(casual, { type: 'endSeries' })).toBe(casual);
+  });
+
+  it('versus the AI the human changes sides each game and seat B can win', () => {
+    let m = matchReducer(initialMatch(HVA_X), { type: 'startSeries', bestOf: 5 });
+    expect(winsNeeded(5)).toBe(3);
+    m = play(m, ...O_WIN); // AI (O, seat B) wins
+    expect(m.series?.wins).toEqual({ A: 0, B: 1 });
+    expect(seriesWinner(m.series!)).toBeNull();
+    expect(seriesWinner({ ...m.series!, wins: { A: 0, B: 3 } })).toBe('B');
+    m = matchReducer(m, { type: 'newGame' });
+    expect(m.config.humanSide).toBe('O');
+    expect(seatOf(m, 'O')).toBe('A'); // the human keeps seat A
+    expect(matchDifficulty(m, 'X')).toBe('medium');
+  });
+
+  it('swaps AI difficulties in watch mode', () => {
+    let m = matchReducer(initialMatch(AVA), { type: 'startSeries', bestOf: 99 });
+    expect(m.series?.bestOf).toBe(3); // unknown lengths fall back
+    expect(matchDifficulty(m, 'X')).toBe('easy');
+    m = matchReducer(play(m, ...X_WIN), { type: 'newGame' });
+    expect(matchDifficulty(m, 'X')).toBe('hard');
+    expect(matchDifficulty(m, 'O')).toBe('easy');
+  });
+
+  it('does not count results while browsing history or twice', () => {
+    let m = matchReducer(initialMatch(HVH), { type: 'startSeries', bestOf: 3 });
+    m = play(m, ...X_WIN);
+    const back = matchReducer(m, { type: 'jump', cursor: 2 });
+    expect(matchReducer(back, { type: 'play', index: 8 }).series?.wins).toEqual({ A: 1, B: 0 });
+    expect(matchReducer(m, { type: 'redo' }).series?.wins).toEqual({ A: 1, B: 0 });
+    const loaded = matchReducer(m, { type: 'load', config: HVH, moves: [4] });
+    expect(loaded.series).toBeNull();
   });
 });

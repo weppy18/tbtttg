@@ -322,3 +322,57 @@ test('daily puzzle: wrong tries reveal a hint, the solution solves it, and progr
   await page.getByTestId('back').click();
   await expect(page.getByTestId('board')).toBeVisible();
 });
+
+test('tournament: best-of-3 alternates sides, keeps score, and declares a series winner', async ({
+  page,
+}) => {
+  await setMode(page, 'Two players');
+  await page.getByTestId('players').locator('summary').click();
+  await page.getByTestId('name-X').fill('Alice');
+  await page.getByTestId('name-O').fill('Bob');
+  await page.getByTestId('series-3').click();
+  await expect(page.getByTestId('series')).toContainText('Best of 3 · Game 1');
+  await expect(page.getByTestId('series-score')).toContainText('Alice');
+  await expect(page.getByTestId('series-score')).toContainText('0 – 0');
+
+  // Game 1: X (Alice) wins the top row.
+  for (const [r, c] of [
+    [1, 1],
+    [2, 1],
+    [1, 2],
+    [2, 2],
+    [1, 3],
+  ] as const)
+    await cell(page, r, c).click();
+  await expect(status(page)).toHaveText('Alice wins!');
+  await expect(page.getByTestId('series-score')).toContainText('1 – 0');
+  await page.getByTestId('new-game').click(); // "Next game"
+
+  // Game 2: sides swap — X is now Bob.
+  await expect(page.getByTestId('series')).toContainText('Game 2');
+  await expect(status(page)).toHaveText('Bob to move');
+  for (const [r, c] of [
+    [1, 1],
+    [2, 1],
+    [1, 2],
+    [2, 2],
+    [1, 3],
+  ] as const)
+    await cell(page, r, c).click();
+  await expect(status(page)).toHaveText('Bob wins!');
+  await expect(page.getByTestId('series-score')).toContainText('1 – 1');
+  await page.getByTestId('new-game').click();
+
+  // Game 3: Alice is X again and takes the series.
+  await expect(status(page)).toHaveText('Alice to move');
+  for (const [r, c] of [
+    [1, 1],
+    [2, 1],
+    [1, 2],
+    [2, 2],
+    [1, 3],
+  ] as const)
+    await cell(page, r, c).click();
+  await expect(status(page)).toHaveText('Alice wins the series 2–1!');
+  await expect(page.getByTestId('new-game')).toHaveText('New series');
+});

@@ -4,6 +4,7 @@ import {
   createVariant,
   isLegalVariantMove,
   isVariantId,
+  other,
   replayVariant,
   type AnyGame,
   type Difficulty,
@@ -34,8 +35,25 @@ export const DEFAULT_CONFIG: MatchConfig = {
   difficultyO: 'medium',
 };
 
+/** Participant in a series: A is whoever plays X in game 1. */
+export type Seat = 'A' | 'B';
+
+export interface Series {
+  readonly bestOf: number;
+  /** 0-based index of the current game. Odd games swap seats. */
+  readonly game: number;
+  readonly wins: Readonly<Record<Seat, number>>;
+  readonly draws: number;
+  /** True once the current game's result has been counted. */
+  readonly recorded: boolean;
+}
+
+export const SERIES_LENGTHS: readonly number[] = [3, 5, 7];
+
 export interface MatchState {
   readonly config: MatchConfig;
+  /** Best-of-N series, or null for casual play. */
+  readonly series: Series | null;
   /** Full move list, including moves beyond `cursor` (the redo tail). */
   readonly moves: readonly number[];
   /** Number of moves currently applied. */
@@ -52,10 +70,51 @@ export type MatchAction =
   | { type: 'redo' }
   | { type: 'jump'; cursor: number }
   | { type: 'newGame'; config?: Partial<MatchConfig> }
-  | { type: 'load'; config: MatchConfig; moves: readonly number[]; cursor?: number };
+  | { type: 'load'; config: MatchConfig; moves: readonly number[]; cursor?: number }
+  | { type: 'startSeries'; bestOf: number }
+  | { type: 'endSeries' };
 
 export function initialMatch(config: MatchConfig = DEFAULT_CONFIG): MatchState {
-  return { config, moves: [], cursor: 0, gameId: 0, invalid: null };
+  return { config, series: null, moves: [], cursor: 0, gameId: 0, invalid: null };
+}
+
+/** Odd series games swap seats: X is played by whoever was O in game 1. */
+export function isSwapped(match: MatchState): boolean {
+  return match.series !== null && match.series.game % 2 === 1;
+}
+
+/** The series seat currently playing `player`. */
+export function seatOf(match: MatchState, player: Player): Seat {
+  return (player === 'X') !== isSwapped(match) ? 'A' : 'B';
+}
+
+/** Wins needed to take a best-of-N series. */
+export function winsNeeded(bestOf: number): number {
+  return Math.floor(bestOf / 2) + 1;
+}
+
+/** Winning seat once decided, else null. Draws never decide a series. */
+export function seriesWinner(series: Series): Seat | null {
+  const need = winsNeeded(series.bestOf);
+  if (series.wins.A >= need) return 'A';
+  if (series.wins.B >= need) return 'B';
+  return null;
+}
+
+/** Count the finished live game into the series (idempotent). */
+function recordSeriesResult(match: MatchState): MatchState {
+  const { series } = match;
+  if (!series || series.recorded || match.cursor !== match.moves.length) return match;
+  const game = currentGame(match);
+  if (game.status === 'playing') return match;
+  if (game.status === 'draw') {
+    return { ...match, series: { ...series, draws: series.draws + 1, recorded: true } };
+  }
+  const seat = seatOf(match, game.winner!);
+  return {
+    ...match,
+    series: { ...series, wins: { ...series.wins, [seat]: series.wins[seat] + 1 }, recorded: true },
+  };
 }
 
 /** The engine state at the current cursor. Cheap (≤ 25 moves), memoise in React. */
@@ -73,6 +132,13 @@ export function isAiSide(config: MatchConfig, player: Player): boolean {
 export function difficultyFor(config: MatchConfig, player: Player): Difficulty {
   if (config.mode === 'ava' && player === 'O') return config.difficultyO;
   return config.difficulty;
+}
+
+/** Difficulty for the AI playing `player` in this match, honouring series seat swaps. */
+export function matchDifficulty(match: MatchState, player: Player): Difficulty {
+  if (match.config.mode === 'ava' && isSwapped(match))
+    return difficultyFor(match.config, other(player));
+  return difficultyFor(match.config, player);
 }
 
 /** Who moves at position `cursor` (X moves at even positions). */
@@ -121,7 +187,7 @@ export function matchReducer(match: MatchState, action: MatchAction): MatchState
         };
       }
       const moves = [...match.moves.slice(0, match.cursor), action.index];
-      return { ...match, moves, cursor: moves.length, invalid: null };
+      return recordSeriesResult({ ...match, moves, cursor: moves.length, invalid: null });
     }
     case 'undo': {
       if (!canUndo(match)) return match;
@@ -136,9 +202,51 @@ export function matchReducer(match: MatchState, action: MatchAction): MatchState
       return { ...match, cursor, invalid: null };
     }
     case 'newGame': {
-      const config = { ...match.config, ...action.config };
-      return { config, moves: [], cursor: 0, gameId: match.gameId + 1, invalid: null };
+      // Changing the setup ends any series; "play again" inside one advances it.
+      if (action.config || !match.series) {
+        const config = { ...match.config, ...action.config };
+        return {
+          ...match,
+          config,
+          series: null,
+          moves: [],
+          cursor: 0,
+          gameId: match.gameId + 1,
+          invalid: null,
+        };
+      }
+      const counted = recordSeriesResult(match);
+      const series = counted.series!;
+      if (seriesWinner(series)) return counted; // series over: stay on the final board
+      const next: Series = { ...series, game: series.game + 1, recorded: false };
+      // Versus the AI the human physically changes sides; other modes swap via seats.
+      const config =
+        match.config.mode === 'hva'
+          ? { ...match.config, humanSide: other(match.config.humanSide) }
+          : match.config;
+      return {
+        ...counted,
+        config,
+        series: next,
+        moves: [],
+        cursor: 0,
+        gameId: match.gameId + 1,
+        invalid: null,
+      };
     }
+    case 'startSeries': {
+      const bestOf = SERIES_LENGTHS.includes(action.bestOf) ? action.bestOf : 3;
+      return {
+        ...match,
+        series: { bestOf, game: 0, wins: { A: 0, B: 0 }, draws: 0, recorded: false },
+        moves: [],
+        cursor: 0,
+        gameId: match.gameId + 1,
+        invalid: null,
+      };
+    }
+    case 'endSeries':
+      return match.series ? { ...match, series: null } : match;
     case 'load': {
       // Validate by replaying; keep only the legal prefix.
       let game = createVariant(action.config.variant);
@@ -154,6 +262,7 @@ export function matchReducer(match: MatchState, action: MatchAction): MatchState
           : Math.max(0, Math.min(valid.length, action.cursor));
       return {
         config: action.config,
+        series: null,
         moves: valid,
         cursor,
         gameId: match.gameId + 1,
