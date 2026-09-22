@@ -1,0 +1,105 @@
+:root {
+  color-scheme: light dark;
+  --bg: #0f172a;
+  --fg: #e2e8f0;
+  --muted: #94a3b8;
+  --surface: #1e293b;
+  --x: #38bdf8;
+  --o: #fb7185;
+  --win: #fbbf24;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  width: 100%;
+  max-width: 32rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+}
+
+.status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.125rem;
+  min-height: 1.5em;
+}
+
+.board {
+  --gap: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(var(--size), 1fr);
+  gap: var(--gap);
+  width: min(90vw, 24rem);
+  aspect-ratio: 1;
+}
+
+.cell {
+  border: 0;
+  border-radius: 0.75rem;
+  background: var(--surface);
+  color: var(--fg);
+  font-size: clamp(2rem, 12vw, 4rem);
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 120ms ease;
+}
+.cell:hover:not(:disabled) {
+  transform: scale(1.04);
+}
+.cell:focus-visible {
+  outline: 3px solid var(--win);
+  outline-offset: 2px;
+}
+.cell:disabled {
+  cursor: default;
+}
+.cell[data-mark='X'] {
+  color: var(--x);
+}
+.cell[data-mark='O'] {
+  color: var(--o);
+}
+.cell--win {
+  background: color-mix(in srgb, var(--win) 25%, var(--surface));
+}
+
+.btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  background: var(--x);
+  color: var(--bg);
+  cursor: pointer;
+}
+.btn:focus-visible {
+  outline: 3px solid var(--win);
+  outline-offset: 2px;
+}
