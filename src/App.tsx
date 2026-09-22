@@ -1,10 +1,12 @@
-import { useEffect } from 'react';
+import { useEffect, type CSSProperties } from 'react';
 import { GameScreen } from './components/GameScreen.tsx';
 import { Header } from './components/Header.tsx';
 import { useTheme } from './hooks/useTheme.ts';
 import { I18nProvider } from './i18n/I18nProvider.tsx';
 import { detectLocale } from './i18n/index.ts';
 import { setSoundEnabled, unlockAudio } from './lib/sound.ts';
+import { ProfilesProvider } from './state/ProfilesProvider.tsx';
+import { useProfiles } from './state/profilesContext.ts';
 import { SettingsProvider } from './state/SettingsProvider.tsx';
 import { useSettings } from './state/settingsContext.ts';
 
@@ -27,9 +29,14 @@ function Shell() {
     };
   }, []);
   const locale = settings.locale ?? detectLocale(navigator.languages ?? [navigator.language]);
+  const { profiles } = useProfiles();
+  const colours = {
+    ...(profiles.X.color ? { '--x': profiles.X.color } : {}),
+    ...(profiles.O.color ? { '--o': profiles.O.color } : {}),
+  } as CSSProperties;
   return (
     <I18nProvider locale={locale}>
-      <div className="app" lang={locale}>
+      <div className="app" lang={locale} style={colours}>
         <Header locale={locale} />
         <main className="main">
           <GameScreen />
@@ -42,7 +49,9 @@ function Shell() {
 export function App() {
   return (
     <SettingsProvider>
-      <Shell />
+      <ProfilesProvider>
+        <Shell />
+      </ProfilesProvider>
     </SettingsProvider>
   );
 }

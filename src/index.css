@@ -750,3 +750,137 @@ button {
   inset: 2px;
   border-width: 2px;
 }
+
+/* ---------- Players ---------- */
+.mark--glyph {
+  display: grid;
+  place-items: center;
+  font-size: clamp(1rem, 56cqw, 7rem);
+  line-height: 1;
+  font-weight: 800;
+}
+.cell {
+  container-type: inline-size;
+}
+.mark--glyph.mark--enter {
+  animation: pop 220ms var(--ease);
+}
+@keyframes pop {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+}
+.players {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.players > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.players > summary::-webkit-details-marker {
+  display: none;
+}
+.players > summary::after {
+  content: '+';
+  font-weight: 800;
+  color: var(--muted);
+}
+.players[open] > summary::after {
+  content: '3';
+}
+.player {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px 12px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.player__legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  padding: 0 6px;
+}
+.player__preview {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--surface-2);
+  container-type: inline-size;
+}
+.player__preview .mark {
+  width: 70%;
+  height: 70%;
+}
+.player__preview .mark--glyph {
+  font-size: 1rem;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.field > span {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  font-weight: 700;
+}
+.field input[type='text'] {
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--fg);
+  font: inherit;
+}
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.swatch {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.15);
+  transition: transform 120ms var(--ease);
+  padding: 0;
+}
+.swatch--on {
+  transform: scale(1.12);
+  box-shadow:
+    0 0 0 2px var(--surface),
+    0 0 0 4px var(--fg);
+}
+.swatch--glyph {
+  background: var(--surface-2);
+  font-size: 1rem;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+}
+.swatch--custom {
+  width: 48px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  font: inherit;
+  color: var(--fg);
+}

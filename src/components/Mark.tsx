@@ -1,4 +1,6 @@
 import type { Player } from '../engine/index.ts';
+import { isStrokeMark } from '../state/profiles.ts';
+import { useProfiles } from '../state/profilesContext.ts';
 
 interface Props {
   player: Player;
@@ -7,12 +9,21 @@ interface Props {
 }
 
 /**
- * An X or O drawn as SVG strokes so it can animate in and scale crisply
- * from a 360px phone to a 4K monitor.
+ * A player's mark: X/O drawn as SVG strokes so they animate in and scale
+ * crisply, or the player's chosen glyph (emoji/text) rendered as text.
  */
 export function Mark({ player, animate = false }: Props) {
+  const { profiles } = useProfiles();
+  const glyph = profiles[player].mark;
   const cls = `mark mark--${player.toLowerCase()}${animate ? ' mark--enter' : ''}`;
-  if (player === 'X') {
+  if (!isStrokeMark(glyph)) {
+    return (
+      <span className={`${cls} mark--glyph`} aria-hidden="true">
+        {glyph}
+      </span>
+    );
+  }
+  if (glyph === 'X') {
     return (
       <svg className={cls} viewBox="0 0 100 100" aria-hidden="true" focusable="false">
         <line className="mark__stroke mark__stroke--1" x1="22" y1="22" x2="78" y2="78" />

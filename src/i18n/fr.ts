@@ -111,6 +111,15 @@ export const fr: Record<MessageKey, string> = {
   'history.start': 'Début',
   'history.jumpTo': 'Aller au coup {n}',
 
+  'players.title': 'Joueurs',
+  'players.player': 'Joueur {player}',
+  'players.name': 'Nom',
+  'players.color': 'Couleur',
+  'players.mark': 'Symbole',
+  'players.customMark': 'Symbole personnalisé',
+  'players.reset': 'Réinitialiser',
+  'players.ai': 'IA',
+
   'analysis.title': 'Analyse',
   'analysis.running': 'Analyse en cours…',
   'analysis.perfect': 'parfait',

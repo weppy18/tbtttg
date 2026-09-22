@@ -223,3 +223,23 @@ test('ultimate: moves constrain the next board, AI replies, and a game can be wa
   await page.getByLabel('Easy', { exact: true }).nth(1).check();
   await expect(status(page)).toHaveText(/wins|Draw/, { timeout: 90000 });
 });
+
+test('player profiles: names show in status, custom marks render, and persist', async ({
+  page,
+}) => {
+  await setMode(page, 'Two players');
+  await page.getByTestId('players').locator('summary').click();
+  await page.getByTestId('name-X').fill('Alice');
+  await page.getByTestId('name-O').fill('Bob');
+  await expect(status(page)).toHaveText('Alice to move');
+  await page.getByTestId('players').getByRole('button', { name: '🐱' }).first().click();
+  await cell(page, 1, 1).click();
+  await expect(cell(page, 1, 1).locator('.mark--glyph')).toHaveText('🐱');
+  await expect(status(page)).toHaveText('Bob to move');
+  await page.reload();
+  await page.getByTestId('players').locator('summary').click();
+  await expect(page.getByTestId('name-X')).toHaveValue('Alice');
+  await expect(
+    page.getByTestId('players').getByRole('button', { name: '🐱' }).first(),
+  ).toHaveAttribute('aria-pressed', 'true');
+});

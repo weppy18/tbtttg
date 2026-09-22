@@ -26,6 +26,9 @@ import { LiveAnnouncer } from './LiveAnnouncer.tsx';
 import { MoveHistory } from './MoveHistory.tsx';
 import { Scoreboard } from './Scoreboard.tsx';
 import { SetupPanel } from './SetupPanel.tsx';
+import { PlayersPanel } from './PlayersPanel.tsx';
+import { useProfiles } from '../state/profilesContext.ts';
+import type { Player } from '../engine/index.ts';
 
 const CONFETTI_COLORS = ['#38bdf8', '#fb7185', '#fbbf24', '#34d399', '#a78bfa'];
 
@@ -47,23 +50,39 @@ function describeMove(game: AnyGame, move: number): MoveDescription {
   return { short: `${String.fromCharCode(97 + c)}${r + 1}`, row: r + 1, col: c + 1 };
 }
 
+/** Display name for a side: the profile name, "AI" for AI sides, else the letter. */
+function useNames(config: MatchConfig): (player: Player) => string {
+  const t = useT();
+  const { profiles } = useProfiles();
+  return useCallback(
+    (player: Player) => {
+      if (isAiSide(config, player)) {
+        return config.mode === 'ava' ? `${t('players.ai')} ${player}` : t('players.ai');
+      }
+      return profiles[player].name || player;
+    },
+    [config, profiles, t],
+  );
+}
+
 function useStatus(config: MatchConfig, game: AnyGame, aiThinking: boolean): string {
   const t = useT();
+  const name = useNames(config);
   if (game.status === 'draw') return t('status.draw');
   if (game.status === 'won' && game.winner) {
     if (config.mode === 'hva') {
       return game.winner === config.humanSide ? t('status.youWin') : t('status.youLose');
     }
     if (game.kind === 'board' && game.rules.misere) {
-      return t('status.misereWin', { loser: other(game.winner), player: game.winner });
+      return t('status.misereWin', { loser: name(other(game.winner)), player: name(game.winner) });
     }
-    return t('status.win', { player: game.winner });
+    return t('status.win', { player: name(game.winner) });
   }
   if (aiThinking) return t('status.aiThinking');
   if (config.mode === 'hva' && game.toMove === config.humanSide) {
-    return t('status.yourTurn', { player: game.toMove });
+    return t('status.yourTurn', { player: name(game.toMove) });
   }
-  return t('status.toMove', { player: game.toMove });
+  return t('status.toMove', { player: name(game.toMove) });
 }
 
 export function GameScreen() {
@@ -77,6 +96,7 @@ export function GameScreen() {
   const { match, game, undo, redo, newGame } = m;
   const { announce, message, nonce } = useAnnouncer();
   const status = useStatus(match.config, game, m.aiThinking);
+  const name = useNames(match.config);
   const { hint, requestHint, analysis, analysing, analyse } = useAnalysis(
     match.config.variant,
     match.gameId,
@@ -110,7 +130,7 @@ export function GameScreen() {
     const { row, col } = describeMove(game, last);
     const mover = other(game.toMove);
     const ai = isAiSide(match.config, mover);
-    let text = t(ai ? 'announce.aiMove' : 'announce.move', { player: mover, row, col });
+    let text = t(ai ? 'announce.aiMove' : 'announce.move', { player: name(mover), row, col });
     if (game.kind === 'ultimate' && game.status === 'playing') {
       text +=
         ' ' +
@@ -119,7 +139,7 @@ export function GameScreen() {
           : t('ultimate.sentTo', { n: game.activeBoard + 1 }));
     }
     if (game.status === 'won' && game.winner) {
-      text += ' ' + t('announce.win', { player: game.winner });
+      text += ' ' + t('announce.win', { player: name(game.winner) });
       const humanLost = match.config.mode === 'hva' && game.winner !== match.config.humanSide;
       playSound(humanLost ? 'lose' : 'win');
     } else if (game.status === 'draw') {
@@ -129,7 +149,7 @@ export function GameScreen() {
       playSound(mover === 'X' ? 'place-x' : 'place-o');
     }
     announce(text);
-  }, [match.gameId, match.cursor, match.moves, match.config, game, announce, t]);
+  }, [match.gameId, match.cursor, match.moves, match.config, game, announce, t, name]);
 
   useEffect(() => {
     if (match.invalid) playSound('invalid');
@@ -341,6 +361,7 @@ export function GameScreen() {
       <aside className="game__side">
         <SetupPanel config={match.config} onChange={(patch) => m.newGame(patch)} />
         <Scoreboard stats={stats} config={match.config} onReset={() => setStats({})} />
+        <PlayersPanel />
         <MoveHistory
           moves={match.moves}
           cursor={match.cursor}

@@ -9,3 +9,4 @@
 | 0h32m   | Hints/analysis/sound committed. Next: shareable game URLs + animated replay                                            |
 | 0h36m   | Share/replay committed. Next: Ultimate Tic-Tac-Toe engine + AI + UI                                                    |
 | 0h41m   | Ultimate engine committed. Integrating Ultimate into store/worker/UI (adapter layer)                                   |
+| 0h49m   | Ultimate integrated + e2e green. Next: player profiles (names/colors/marks), then onboarding + PWA/Lighthouse          |

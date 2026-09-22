@@ -119,6 +119,16 @@ export const en = {
   'history.start': 'Start',
   'history.jumpTo': 'Jump to move {n}',
 
+  // Players
+  'players.title': 'Players',
+  'players.player': 'Player {player}',
+  'players.name': 'Name',
+  'players.color': 'Colour',
+  'players.mark': 'Mark',
+  'players.customMark': 'Custom mark',
+  'players.reset': 'Reset',
+  'players.ai': 'AI',
+
   // Analysis
   'analysis.title': 'Analysis',
   'analysis.running': 'Analysing…',
