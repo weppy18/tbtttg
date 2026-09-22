@@ -20,3 +20,4 @@
 | 1h26m | Daily puzzle committed. NEVER-DONE #5: tournament mode (best-of-N, alternating first player, series scoreboard) |
 | 1h27m | Tournament committed. NEVER-DONE #6: hot-seat turn shield |
 | 1h33m | Hot seat committed. NEVER-DONE #7: opening-book explorer (interactive 3x3 game-tree browser) |
+| 1h39m | Explorer + verify gate committed (79 e2e, 114 unit). NEVER-DONE #8: AI personalities (aggressive/defensive/trickster) |

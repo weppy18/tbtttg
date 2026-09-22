@@ -21,6 +21,19 @@ export const fr: Record<MessageKey, string> = {
   'difficulty.x': 'Difficulté de X',
   'difficulty.o': 'Difficulté de O',
 
+  'personality.label': 'Style',
+  'personality.x': 'Style de X',
+  'personality.o': 'Style de O',
+  'personality.balanced': 'Équilibré',
+  'personality.aggressive': 'Agressif',
+  'personality.defensive': 'Défensif',
+  'personality.trickster': 'Piégeur',
+  'personality.balanced.hint': 'Choisit librement parmi les meilleurs coups.',
+  'personality.aggressive.hint': 'Crée des menaces et vise la victoire la plus rapide.',
+  'personality.defensive.hint': "Ferme d'abord vos lignes.",
+  'personality.trickster.hint':
+    'Tend des pièges : préfère les positions où vous avez le plus de façons de vous tromper.',
+
   'side.label': 'Vous jouez',
   'side.x': 'X (premier)',
   'side.o': 'O (second)',

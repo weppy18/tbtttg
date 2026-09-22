@@ -12,6 +12,7 @@ import {
   isAiSide,
   isSwapped,
   matchDifficulty,
+  matchPersonality,
   matchReducer,
   parseConfig,
   type MatchConfig,
@@ -74,6 +75,7 @@ export function useMatch(onGameOver?: (config: MatchConfig, game: AnyGame) => vo
   const live = match.cursor === match.moves.length;
   const aiTurn = live && game.status === 'playing' && isAiSide(match.config, game.toMove);
   const difficulty = matchDifficulty(match, game.toMove);
+  const personality = matchPersonality(match, game.toMove);
 
   // Schedule the AI's reply. Cancelled if anything about the position changes first.
   useEffect(() => {
@@ -82,7 +84,7 @@ export function useMatch(onGameOver?: (config: MatchConfig, game: AnyGame) => vo
     let cancelRequest: (() => void) | null = null;
     const moves = match.moves.slice(0, match.cursor);
     const timer = setTimeout(() => {
-      const req = requestMove(match.config.variant, moves, difficulty);
+      const req = requestMove(match.config.variant, moves, difficulty, personality);
       cancelRequest = req.cancel;
       void req.promise.then((index) => {
         if (!cancelled) dispatch({ type: 'play', index });
@@ -93,7 +95,16 @@ export function useMatch(onGameOver?: (config: MatchConfig, game: AnyGame) => vo
       clearTimeout(timer);
       cancelRequest?.();
     };
-  }, [aiTurn, match.moves, match.cursor, match.config, match.gameId, game.toMove, difficulty]);
+  }, [
+    aiTurn,
+    match.moves,
+    match.cursor,
+    match.config,
+    match.gameId,
+    game.toMove,
+    difficulty,
+    personality,
+  ]);
 
   // Record the first result of each game exactly once (undoing a loss doesn't erase it).
   const recorded = useRef(-1);

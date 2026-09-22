@@ -1,4 +1,11 @@
-import { DIFFICULTIES, VARIANT_IDS, type Difficulty, type Player } from '../engine/index.ts';
+import {
+  DIFFICULTIES,
+  PERSONALITIES,
+  VARIANT_IDS,
+  type Difficulty,
+  type Personality,
+  type Player,
+} from '../engine/index.ts';
 import { useT } from '../i18n/index.ts';
 import { MODES, type MatchConfig, type Mode } from '../state/match.ts';
 import { Segmented } from './Segmented.tsx';
@@ -18,6 +25,13 @@ export function SetupPanel({ config, onChange, hotSeat, onHotSeat }: Props) {
     label: t(`difficulty.${d}`),
     hint: t(`difficulty.${d}.hint`),
   }));
+  const personalityOptions = PERSONALITIES.map((p) => ({
+    value: p,
+    label: t(`personality.${p}`),
+    hint: t(`personality.${p}.hint`),
+  }));
+  // Personalities only shape searched moves, so they're moot on Ultimate (own engine) and Easy.
+  const showPersonality = config.variant !== 'ultimate';
 
   return (
     <div className="setup" data-testid="setup">
@@ -65,6 +79,14 @@ export function SetupPanel({ config, onChange, hotSeat, onHotSeat }: Props) {
             options={difficultyOptions}
             onChange={(difficulty) => onChange({ difficulty })}
           />
+          {showPersonality && config.difficulty !== 'easy' && (
+            <Segmented<Personality>
+              label={t('personality.label')}
+              value={config.personality}
+              options={personalityOptions}
+              onChange={(personality) => onChange({ personality })}
+            />
+          )}
         </>
       )}
       {config.mode === 'ava' && (
@@ -81,6 +103,22 @@ export function SetupPanel({ config, onChange, hotSeat, onHotSeat }: Props) {
             options={difficultyOptions}
             onChange={(difficultyO) => onChange({ difficultyO })}
           />
+          {showPersonality && (
+            <>
+              <Segmented<Personality>
+                label={t('personality.x')}
+                value={config.personality}
+                options={personalityOptions}
+                onChange={(personality) => onChange({ personality })}
+              />
+              <Segmented<Personality>
+                label={t('personality.o')}
+                value={config.personalityO}
+                options={personalityOptions}
+                onChange={(personalityO) => onChange({ personalityO })}
+              />
+            </>
+          )}
         </>
       )}
       <p className="setup__rules">{t(`variant.${config.variant}.rules`)}</p>

@@ -21,6 +21,20 @@ export const en = {
   'difficulty.x': 'X difficulty',
   'difficulty.o': 'O difficulty',
 
+  // Personality
+  'personality.label': 'Style',
+  'personality.x': 'X style',
+  'personality.o': 'O style',
+  'personality.balanced': 'Balanced',
+  'personality.aggressive': 'Aggressive',
+  'personality.defensive': 'Defensive',
+  'personality.trickster': 'Trickster',
+  'personality.balanced.hint': 'Picks freely among the best moves.',
+  'personality.aggressive.hint': 'Builds threats and goes for the fastest win.',
+  'personality.defensive.hint': 'Shuts down your lines first.',
+  'personality.trickster.hint':
+    'Sets traps: prefers positions where you have the most ways to go wrong.',
+
   // Side
   'side.label': 'You play',
   'side.x': 'X (first)',

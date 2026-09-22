@@ -9,6 +9,7 @@ import {
   isAiSide,
   isSwapped,
   matchDifficulty,
+  matchPersonality,
   matchReducer,
   parseConfig,
   redoTarget,
@@ -171,6 +172,12 @@ describe('config helpers', () => {
     expect(parseConfig({ ...DEFAULT_CONFIG, humanSide: 'Z' })).toBeNull();
     expect(parseConfig({ ...DEFAULT_CONFIG, difficulty: 'ultra' })).toBeNull();
     expect(parseConfig({ ...DEFAULT_CONFIG, difficultyO: 'ultra' })).toBeNull();
+    // configs saved before personalities existed still load
+    const legacy: Record<string, unknown> = { ...DEFAULT_CONFIG };
+    delete legacy.personality;
+    delete legacy.personalityO;
+    expect(parseConfig(legacy)).toEqual(DEFAULT_CONFIG);
+    expect(parseConfig({ ...DEFAULT_CONFIG, personality: 'bogus' })?.personality).toBe('balanced');
   });
 });
 
@@ -229,13 +236,21 @@ describe('series (best-of-N)', () => {
     expect(matchDifficulty(m, 'X')).toBe('medium');
   });
 
-  it('swaps AI difficulties in watch mode', () => {
-    let m = matchReducer(initialMatch(AVA), { type: 'startSeries', bestOf: 99 });
+  it('swaps AI difficulties and personalities in watch mode', () => {
+    const styled: MatchConfig = { ...AVA, personality: 'aggressive', personalityO: 'trickster' };
+    let m = matchReducer(initialMatch(styled), { type: 'startSeries', bestOf: 99 });
     expect(m.series?.bestOf).toBe(3); // unknown lengths fall back
     expect(matchDifficulty(m, 'X')).toBe('easy');
+    expect(matchPersonality(m, 'X')).toBe('aggressive');
+    expect(matchPersonality(m, 'O')).toBe('trickster');
     m = matchReducer(play(m, ...X_WIN), { type: 'newGame' });
     expect(matchDifficulty(m, 'X')).toBe('hard');
     expect(matchDifficulty(m, 'O')).toBe('easy');
+    expect(matchPersonality(m, 'X')).toBe('trickster');
+    expect(matchPersonality(m, 'O')).toBe('aggressive');
+    // versus the AI there is a single style
+    const solo = initialMatch({ ...HVA_X, personality: 'defensive' });
+    expect(matchPersonality(solo, 'O')).toBe('defensive');
   });
 
   it('does not count results while browsing history or twice', () => {

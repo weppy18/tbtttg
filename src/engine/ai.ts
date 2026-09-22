@@ -1,5 +1,6 @@
 import { applyMove, legalMoves, other } from './game.ts';
 import { allLines } from './lines.ts';
+import { pickByPersonality, type Personality } from './personality.ts';
 import { pick, seededRng, type Rng } from './random.ts';
 import type { Cell, GameState, Player, Rules } from './types.ts';
 
@@ -245,9 +246,18 @@ export function chooseMove(
   state: GameState,
   difficulty: Difficulty,
   rng: Rng = Math.random,
+  personality: Personality = 'balanced',
 ): number {
   const legal = legalMoves(state);
   if (legal.length === 0) throw new RangeError('No legal moves: the game is over');
+  const searched = (level: Difficulty) =>
+    pickByPersonality(
+      state,
+      evaluateMoves(state, { maxDepth: depthFor(level, state.rules) }),
+      personality,
+      rng,
+      { maxDepth: depthFor(level, state.rules) },
+    );
 
   switch (difficulty) {
     case 'easy': {
@@ -267,11 +277,11 @@ export function chooseMove(
         const safe = safeMoves(state);
         return pick(safe.length > 0 ? safe : legal, rng);
       }
-      return pick(bestMoves(state, { maxDepth: depthFor('medium', state.rules) }), rng);
+      return searched('medium');
     }
     case 'hard':
     case 'impossible':
-      return pick(bestMoves(state, { maxDepth: depthFor(difficulty, state.rules) }), rng);
+      return searched(difficulty);
   }
 }
 

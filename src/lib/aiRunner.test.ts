@@ -9,6 +9,7 @@ describe('runAiRequest', () => {
       variant: 'classic',
       moves: [0, 3, 1, 4],
       difficulty: 'impossible',
+      personality: 'balanced',
       seed: 1,
     });
     expect(move).toEqual({ id: 1, kind: 'move', index: 2 });

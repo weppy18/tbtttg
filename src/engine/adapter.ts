@@ -1,4 +1,5 @@
 import { chooseMove, evaluateMoves, type Difficulty, type MoveEval } from './ai.ts';
+import type { Personality } from './personality.ts';
 import {
   analyseGame,
   analysisOptions,
@@ -49,9 +50,14 @@ export function legalVariantMoves(game: AnyGame): number[] {
   return game.kind === 'board' ? legalMoves(game) : legalUltimateMoves(game);
 }
 
-export function chooseVariantMove(game: AnyGame, difficulty: Difficulty, rng?: Rng): number {
+export function chooseVariantMove(
+  game: AnyGame,
+  difficulty: Difficulty,
+  rng?: Rng,
+  personality: Personality = 'balanced',
+): number {
   return game.kind === 'board'
-    ? chooseMove(game, difficulty, rng)
+    ? chooseMove(game, difficulty, rng, personality)
     : chooseUltimateMove(game, difficulty, rng);
 }
 

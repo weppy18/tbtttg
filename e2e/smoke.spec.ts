@@ -419,3 +419,13 @@ test('opening explorer labels every reply and the best line ends in a draw', asy
   await page.getByTestId('back').click();
   await expect(page.getByTestId('board')).toBeVisible();
 });
+
+test('AI personality can be chosen and an aggressive AI opens in the centre', async ({ page }) => {
+  await setMode(page, 'Versus AI');
+  await page.getByLabel('Hard').check();
+  await page.getByLabel('O (second)').check();
+  await page.getByLabel('Aggressive').check();
+  await expect(cell(page, 2, 2)).toHaveAttribute('data-mark', 'X', { timeout: 5000 });
+  await page.reload();
+  await expect(page.getByLabel('Aggressive')).toBeChecked();
+});

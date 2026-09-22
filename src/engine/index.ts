@@ -8,3 +8,4 @@ export * from './analysis.ts';
 export * from './ultimate.ts';
 export * from './adapter.ts';
 export * from './puzzle.ts';
+export * from './personality.ts';

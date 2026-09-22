@@ -1,4 +1,10 @@
-import type { Difficulty, GameAnalysis, MoveEval, VariantId } from '../engine/index.ts';
+import type {
+  Difficulty,
+  GameAnalysis,
+  MoveEval,
+  Personality,
+  VariantId,
+} from '../engine/index.ts';
 import type { AiRequest, AiResponse } from '../workers/aiProtocol.ts';
 import { runAiRequest } from './aiRunner.ts';
 
@@ -70,10 +76,11 @@ export function requestMove(
   variant: VariantId,
   moves: readonly number[],
   difficulty: Difficulty,
+  personality: Personality = 'balanced',
   seed: number = Math.floor(Math.random() * 2 ** 31),
 ): Cancellable<number> {
   const id = nextId++;
-  const p = send({ id, kind: 'move', variant, moves, difficulty, seed }).then((r) =>
+  const p = send({ id, kind: 'move', variant, moves, difficulty, personality, seed }).then((r) =>
     r.kind === 'move' ? r.index : -1,
   );
   return cancellable(id, p);

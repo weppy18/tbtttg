@@ -1,5 +1,6 @@
 import {
   DIFFICULTIES,
+  PERSONALITIES,
   applyVariantMove,
   createVariant,
   isLegalVariantMove,
@@ -8,6 +9,7 @@ import {
   replayVariant,
   type AnyGame,
   type Difficulty,
+  type Personality,
   type Player,
   type VariantId,
 } from '../engine/index.ts';
@@ -25,6 +27,10 @@ export interface MatchConfig {
   readonly difficulty: Difficulty;
   /** AI level for O in 'ava'. */
   readonly difficultyO: Difficulty;
+  /** Playing style of the AI side in 'hva', and of X in 'ava'. */
+  readonly personality: Personality;
+  /** Playing style of O in 'ava'. */
+  readonly personalityO: Personality;
 }
 
 export const DEFAULT_CONFIG: MatchConfig = {
@@ -33,6 +39,8 @@ export const DEFAULT_CONFIG: MatchConfig = {
   humanSide: 'X',
   difficulty: 'medium',
   difficultyO: 'medium',
+  personality: 'balanced',
+  personalityO: 'balanced',
 };
 
 /** Participant in a series: A is whoever plays X in game 1. */
@@ -132,6 +140,14 @@ export function isAiSide(config: MatchConfig, player: Player): boolean {
 export function difficultyFor(config: MatchConfig, player: Player): Difficulty {
   if (config.mode === 'ava' && player === 'O') return config.difficultyO;
   return config.difficulty;
+}
+
+/** Personality of the AI playing `player` (mirrors {@link matchDifficulty}). */
+export function matchPersonality(match: MatchState, player: Player): Personality {
+  const seat = match.config.mode === 'ava' && isSwapped(match) ? other(player) : player;
+  return match.config.mode === 'ava' && seat === 'O'
+    ? match.config.personalityO
+    : match.config.personality;
 }
 
 /** Difficulty for the AI playing `player` in this match, honouring series seat swaps. */
@@ -280,5 +296,8 @@ export function parseConfig(raw: unknown): MatchConfig | null {
   const difficulty = oneOf(raw.difficulty, DIFFICULTIES);
   const difficultyO = oneOf(raw.difficultyO, DIFFICULTIES);
   if (!variant || !mode || !humanSide || !difficulty || !difficultyO) return null;
-  return { variant, mode, humanSide, difficulty, difficultyO };
+  // Personalities were added later: older saved configs default to balanced.
+  const personality = oneOf(raw.personality, PERSONALITIES) ?? 'balanced';
+  const personalityO = oneOf(raw.personalityO, PERSONALITIES) ?? 'balanced';
+  return { variant, mode, humanSide, difficulty, difficultyO, personality, personalityO };
 }

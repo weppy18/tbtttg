@@ -18,6 +18,7 @@ export function runAiRequest(req: AiRequest): AiResponse {
           replayVariant(req.variant, req.moves),
           req.difficulty,
           seededRng(req.seed),
+          req.personality,
         ),
       };
     case 'evaluate':
