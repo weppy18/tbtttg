@@ -8,8 +8,9 @@ const VARIANTS = ['Classic 3×3', 'Misère 3×3', '4×4', '5×5', 'Ultimate'] as
 const status = (page: Page) => page.getByTestId('status');
 const RESULT = /wins|Draw|win!|AI wins/;
 
-async function playRandomGame(page: Page, maxMoves = 90) {
-  for (let i = 0; i < maxMoves; i++) {
+async function playRandomGame(page: Page, budgetMs = 100_000) {
+  const deadline = Date.now() + budgetMs;
+  while (Date.now() < deadline) {
     if (RESULT.test(await status(page).innerText())) return;
     const playable = page.locator('.cell--empty:not([aria-disabled="true"])');
     const n = await playable.count();

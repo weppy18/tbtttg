@@ -16,7 +16,8 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc -b --noEmit",
     "lighthouse": "node scripts/lighthouse.mjs",
-    "bundle:report": "node scripts/bundle-report.mjs"
+    "bundle:report": "node scripts/bundle-report.mjs",
+    "verify": "bash scripts/verify.sh"
   },
   "dependencies": {
     "react": "^19.3.0",
