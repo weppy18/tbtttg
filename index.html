@@ -18,9 +18,60 @@
     <meta property="og:type" content="website" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <style>
+      /* Pre-hydration skeleton: paints the frame instantly, matches the app's layout to avoid shifts. */
+      html {
+        background: #f5f4ef;
+        color: #16181d;
+      }
+      @media (prefers-color-scheme: dark) {
+        html {
+          background: #0b1020;
+          color: #e8ecf5;
+        }
+      }
+      body {
+        margin: 0;
+        font-family:
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
+      }
+      .sk {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 12px;
+      }
+      .sk h1 {
+        margin: 0;
+        font-size: clamp(1.25rem, 3.2vw, 1.75rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      .sk p {
+        margin: 0;
+        opacity: 0.6;
+        font-size: 0.85rem;
+      }
+      .sk-board {
+        width: min(100%, 88vmin, 520px);
+        aspect-ratio: 1;
+        margin: 44px auto 0;
+        border-radius: 14px;
+        background: rgb(127 127 127 / 0.12);
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="sk" aria-hidden="true">
+        <h1>Tic-Tac-Toe</h1>
+        <p>The game, perfected.</p>
+        <div class="sk-board"></div>
+      </div>
+    </div>
     <noscript>
       <p style="font-family: system-ui; padding: 1rem">
         Tic-Tac-Toe needs JavaScript to run. Please enable it and reload.

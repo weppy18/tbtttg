@@ -1,0 +1,20 @@
+{
+  "fetchTime": "2026-09-22T06:37:50.543Z",
+  "lighthouseVersion": "13.5.0",
+  "formFactor": "mobile",
+  "url": "http://localhost:4173/",
+  "scores": {
+    "performance": 100,
+    "accessibility": 100,
+    "best-practices": 100,
+    "seo": 100
+  },
+  "metrics": {
+    "first-contentful-paint": "1.2 s",
+    "largest-contentful-paint": "1.5 s",
+    "total-blocking-time": "0 ms",
+    "cumulative-layout-shift": "0",
+    "speed-index": "1.2 s",
+    "interactive": "1.5 s"
+  }
+}
