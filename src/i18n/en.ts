@@ -79,6 +79,8 @@ export const en = {
   'action.share': 'Share',
   'action.copied': 'Link copied!',
   'action.replay': 'Replay',
+  'action.stopReplay': 'Stop replay',
+  'share.loaded': 'Shared game loaded. Press Replay to watch it.',
   'action.settings': 'Settings',
   'action.close': 'Close',
   'action.howToPlay': 'How to play',

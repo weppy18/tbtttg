@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import type { GameState } from '../engine/index.ts';
 import { requestMove } from '../lib/aiClient.ts';
+import { SHARE_PARAM, readSharedGame } from '../lib/share.ts';
 import { readJson, writeJson } from '../lib/storage.ts';
 import {
   DEFAULT_CONFIG,
@@ -41,9 +42,26 @@ function aiDelay(config: MatchConfig): number {
 }
 
 export function useMatch(onGameOver?: (config: MatchConfig, game: GameState) => void): MatchApi {
-  const [match, dispatch] = useReducer(matchReducer, undefined, () =>
-    initialMatch(readJson('config', parseConfig, DEFAULT_CONFIG)),
-  );
+  const [match, dispatch] = useReducer(matchReducer, undefined, () => {
+    const config = readJson('config', parseConfig, DEFAULT_CONFIG);
+    const shared = typeof location !== 'undefined' ? readSharedGame(location.href) : null;
+    if (!shared) return initialMatch(config);
+    // A shared link opens in two-player mode so the AI doesn't interfere with the replay.
+    return matchReducer(initialMatch(config), {
+      type: 'load',
+      config: { ...config, mode: 'hvh', variant: shared.variant },
+      moves: shared.moves,
+    });
+  });
+
+  // Drop the share code from the address bar so a refresh doesn't re-import it.
+  useEffect(() => {
+    if (typeof location === 'undefined') return;
+    const url = new URL(location.href);
+    if (!url.searchParams.has(SHARE_PARAM)) return;
+    url.searchParams.delete(SHARE_PARAM);
+    history.replaceState(null, '', url.toString());
+  }, []);
   const game = useMemo(() => currentGame(match), [match]);
 
   useEffect(() => writeJson('config', match.config), [match.config]);

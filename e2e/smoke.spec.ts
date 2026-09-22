@@ -180,3 +180,24 @@ test('sound toggle persists', async ({ page }) => {
   await page.reload();
   await expect(toggle).toHaveAttribute('aria-pressed', 'false');
 });
+
+test('a shared link loads the game, replays it, and share copies a link', async ({
+  page,
+  context,
+}) => {
+  await page.goto('/?g=classic.031425');
+  await expect(status(page)).toHaveText('X wins!');
+  await expect(page).not.toHaveURL(/g=/);
+  await expect(page.locator('[data-mark="X"]')).toHaveCount(3);
+
+  await page.getByTestId('replay').click();
+  await expect(page.locator('[data-mark="X"]')).toHaveCount(0);
+  await expect(page.locator('[data-mark="X"]')).toHaveCount(3, { timeout: 8000 });
+  await expect(status(page)).toHaveText('X wins!');
+
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.getByTestId('share').click();
+  await expect(page.getByTestId('share')).toHaveText('Link copied!');
+  const clip = await page.evaluate(() => navigator.clipboard.readText());
+  expect(clip).toContain('g=classic.03142');
+});

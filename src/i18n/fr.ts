@@ -75,6 +75,8 @@ export const fr: Record<MessageKey, string> = {
   'action.share': 'Partager',
   'action.copied': 'Lien copié !',
   'action.replay': 'Revoir',
+  'action.stopReplay': 'Arrêter',
+  'share.loaded': 'Partie partagée chargée. Appuyez sur Revoir pour la regarder.',
   'action.settings': 'Réglages',
   'action.close': 'Fermer',
   'action.howToPlay': 'Comment jouer',

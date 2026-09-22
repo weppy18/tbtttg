@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   other,
   replay,
@@ -12,7 +12,9 @@ import { useAnnouncer } from '../hooks/useAnnouncer.ts';
 import { useMatch } from '../hooks/useMatch.ts';
 import { usePersistedState } from '../hooks/usePersistedState.ts';
 import { useT } from '../i18n/index.ts';
+import { shareUrl } from '../lib/share.ts';
 import { playSound } from '../lib/sound.ts';
+import { useReplay } from '../hooks/useReplay.ts';
 import { isAiSide, type MatchConfig } from '../state/match.ts';
 import { parseStats, recordGame, type Stats } from '../state/stats.ts';
 import { AnalysisPanel } from './AnalysisPanel.tsx';
@@ -179,6 +181,29 @@ export function GameScreen() {
 
   const variantName = t(`variant.${match.config.variant}`);
   const over = game.status !== 'playing';
+  const finished = finalGame.status !== 'playing';
+
+  const replayer = useReplay(match.gameId, match.moves.length, m.jump);
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    if (!copied) return;
+    const id = setTimeout(() => setCopied(false), 2000);
+    return () => clearTimeout(id);
+  }, [copied]);
+  const share = async () => {
+    const url = shareUrl({ variant: match.config.variant, moves: match.moves }, location.href);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: t('appTitle'), url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      announce(t('action.copied'));
+    } catch {
+      // user dismissed the share sheet or clipboard is blocked — nothing to do
+    }
+  };
 
   return (
     <div className="game">
@@ -243,7 +268,27 @@ export function GameScreen() {
               {t('action.hint')}
             </button>
           )}
-          {finalGame.status !== 'playing' && !analysis && (
+          {finished && (
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={replayer.replaying ? replayer.stop : replayer.start}
+              data-testid="replay"
+            >
+              {replayer.replaying ? t('action.stopReplay') : t('action.replay')}
+            </button>
+          )}
+          {finished && (
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={() => void share()}
+              data-testid="share"
+            >
+              {copied ? t('action.copied') : t('action.share')}
+            </button>
+          )}
+          {finished && !analysis && (
             <button
               type="button"
               className="btn btn--ghost"

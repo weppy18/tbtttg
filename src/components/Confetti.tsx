@@ -49,7 +49,7 @@ export function Confetti({ burst, colors }: Props) {
       const speed = (6 + Math.random() * 9) * dpr;
       return {
         x: W / 2 + (Math.random() - 0.5) * W * 0.3,
-        y: H * 0.55,
+        y: H * 0.45,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
         rot: Math.random() * Math.PI,
