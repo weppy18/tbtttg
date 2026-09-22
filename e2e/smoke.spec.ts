@@ -10,8 +10,37 @@ async function setMode(page: Page, mode: 'Two players' | 'Versus AI' | 'Watch AI
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
+  await page.evaluate(() => {
+    localStorage.clear();
+    // Skip the first-run tour everywhere except the tour test itself.
+    localStorage.setItem('tttg:settings', JSON.stringify({ seenTour: true }));
+  });
+  await page.reload();
+});
+
+test('first run shows a tour that can be stepped through and never returns', async ({ page }) => {
   await page.evaluate(() => localStorage.clear());
   await page.reload();
+  const tour = page.getByTestId('tour');
+  await expect(tour).toBeVisible();
+  await expect(tour).toContainText('Step 1 of 3');
+  await page.getByTestId('tour-next').click();
+  await expect(tour).toContainText('Step 2 of 3');
+  await page.getByTestId('tour-next').click();
+  await page.getByTestId('tour-next').click();
+  await expect(tour).toBeHidden();
+  await page.reload();
+  await expect(page.getByTestId('tour')).toBeHidden();
+});
+
+test('how to play opens a dialog with every variant and closes with Escape', async ({ page }) => {
+  await page.getByTestId('help').click();
+  const dlg = page.getByTestId('how-to-play');
+  await expect(dlg).toBeVisible();
+  await expect(dlg).toContainText('Ultimate');
+  await expect(dlg).toContainText('LOSES');
+  await page.keyboard.press('Escape');
+  await expect(dlg).toBeHidden();
 });
 
 test('two local players can play to a win and restart', async ({ page }) => {

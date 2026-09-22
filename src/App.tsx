@@ -1,6 +1,7 @@
 import { useEffect, type CSSProperties } from 'react';
 import { GameScreen } from './components/GameScreen.tsx';
 import { Header } from './components/Header.tsx';
+import { Tour } from './components/Tour.tsx';
 import { useTheme } from './hooks/useTheme.ts';
 import { I18nProvider } from './i18n/I18nProvider.tsx';
 import { detectLocale } from './i18n/index.ts';
@@ -11,7 +12,7 @@ import { SettingsProvider } from './state/SettingsProvider.tsx';
 import { useSettings } from './state/settingsContext.ts';
 
 function Shell() {
-  const { settings } = useSettings();
+  const { settings, update } = useSettings();
   useTheme(settings.theme);
   useEffect(() => setSoundEnabled(settings.sound), [settings.sound]);
   useEffect(() => {
@@ -38,6 +39,7 @@ function Shell() {
     <I18nProvider locale={locale}>
       <div className="app" lang={locale} style={colours}>
         <Header locale={locale} />
+        <Tour open={!settings.seenTour} onDone={() => update({ seenTour: true })} />
         <main className="main">
           <GameScreen />
         </main>

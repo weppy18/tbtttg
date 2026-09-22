@@ -1,6 +1,8 @@
 import { LOCALES, useT, type Locale } from '../i18n/index.ts';
 import { THEME_MODES, type ThemeMode } from '../state/settings.ts';
 import { useSettings } from '../state/settingsContext.ts';
+import { HowToPlay } from './HowToPlay.tsx';
+import { useState } from 'react';
 
 const THEME_ICON: Record<ThemeMode, string> = { light: '☀', dark: '☾', system: '◐' };
 
@@ -8,13 +10,25 @@ export function Header({ locale }: { locale: Locale }) {
   const t = useT();
   const { settings, update } = useSettings();
   const nextTheme = THEME_MODES[(THEME_MODES.indexOf(settings.theme) + 1) % THEME_MODES.length]!;
+  const [help, setHelp] = useState(false);
   return (
     <header className="header">
+      <HowToPlay open={help} onClose={() => setHelp(false)} />
       <div className="header__brand">
         <h1 className="header__title">{t('appTitle')}</h1>
         <p className="header__tagline">{t('tagline')}</p>
       </div>
       <div className="header__actions">
+        <button
+          type="button"
+          className="icon-btn"
+          onClick={() => setHelp(true)}
+          aria-label={t('action.howToPlay')}
+          title={t('action.howToPlay')}
+          data-testid="help"
+        >
+          <span aria-hidden="true">?</span>
+        </button>
         <button
           type="button"
           className="icon-btn"

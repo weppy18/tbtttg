@@ -143,6 +143,32 @@ export const en = {
   'analysis.playerSummary': '{player}: {summary}',
   'hint.label': 'Suggested move highlighted.',
 
+  // Help & tour
+  'help.controls': 'Controls',
+  'help.controls.mouse': 'Tap or click an empty cell to play.',
+  'help.controls.shortcuts': 'Shortcuts: N new game, U undo, R redo, H hint.',
+  'help.features': 'Features',
+  'help.features.hint': 'Hint shows a best move. Analyse grades every move after a game.',
+  'help.features.analysis':
+    'Browse the move list to replay any position; play from there to explore alternatives.',
+  'help.features.share': 'Share copies a link that replays the finished game.',
+  'help.features.offline':
+    'Installable and fully playable offline; everything is saved on this device.',
+  'tour.title': 'Welcome!',
+  'tour.progress': 'Step {n} of {total}',
+  'tour.skip': 'Skip',
+  'tour.next': 'Next',
+  'tour.done': 'Play',
+  'tour.modes.title': 'Pick a mode and a variant',
+  'tour.modes.body':
+    'Play a friend, challenge the AI at four levels (Impossible never loses), or sit back and watch. Try Misère, bigger boards, or Ultimate.',
+  'tour.play.title': 'Play any way you like',
+  'tour.play.body':
+    'Tap a cell, or use the keyboard: arrows and Enter, or the 1-9 keys. Every move is announced for screen readers.',
+  'tour.tools.title': 'Get better',
+  'tour.tools.body':
+    'Stuck? Press H for a hint. After a game, analyse it to see your mistakes, share it by link, or watch the replay.',
+
   // Misc
   'offline.ready': 'Ready to play offline.',
   'update.available': 'Update available',

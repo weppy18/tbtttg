@@ -133,6 +133,32 @@ export const fr: Record<MessageKey, string> = {
   'analysis.playerSummary': '{player} : {summary}',
   'hint.label': 'Coup suggéré mis en évidence.',
 
+  'help.controls': 'Commandes',
+  'help.controls.mouse': 'Touchez ou cliquez une case vide pour jouer.',
+  'help.controls.shortcuts': 'Raccourcis : N nouvelle partie, U annuler, R rétablir, H indice.',
+  'help.features': 'Fonctionnalités',
+  'help.features.hint':
+    'Indice montre un meilleur coup. Analyser note chaque coup après la partie.',
+  'help.features.analysis':
+    "Parcourez la liste des coups pour revoir n'importe quelle position ; jouez depuis là pour explorer des alternatives.",
+  'help.features.share': 'Partager copie un lien qui rejoue la partie terminée.',
+  'help.features.offline':
+    'Installable et jouable hors ligne ; tout est enregistré sur cet appareil.',
+  'tour.title': 'Bienvenue !',
+  'tour.progress': 'Étape {n} sur {total}',
+  'tour.skip': 'Passer',
+  'tour.next': 'Suivant',
+  'tour.done': 'Jouer',
+  'tour.modes.title': 'Choisissez un mode et une variante',
+  'tour.modes.body':
+    "Jouez contre un ami, défiez l'IA à quatre niveaux (Imbattable ne perd jamais), ou regardez-la jouer. Essayez la Misère, les grandes grilles ou l'Ultime.",
+  'tour.play.title': 'Jouez comme vous voulez',
+  'tour.play.body':
+    "Touchez une case, ou utilisez le clavier : flèches et Entrée, ou les touches 1 à 9. Chaque coup est annoncé aux lecteurs d'écran.",
+  'tour.tools.title': 'Progressez',
+  'tour.tools.body':
+    'Bloqué ? Appuyez sur H pour un indice. Après une partie, analysez-la pour voir vos erreurs, partagez-la par lien ou regardez la relecture.',
+
   'offline.ready': 'Prêt à jouer hors ligne.',
   'update.available': 'Mise à jour disponible',
   'update.reload': 'Recharger',
