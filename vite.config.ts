@@ -11,7 +11,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'icons/*.png', 'icons/*.svg'],
+      includeAssets: ['favicon.svg', 'icons/*.png'],
       manifest: {
         name: 'Tic-Tac-Toe: The Game',
         short_name: 'TicTacToe',
@@ -21,10 +21,12 @@ export default defineConfig({
         display: 'standalone',
         start_url: base,
         scope: base,
+        lang: 'en',
+        categories: ['games'],
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: 'icons/maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {

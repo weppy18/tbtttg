@@ -3,16 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Tic-Tac-Toe: The Game</title>
     <meta
       name="description"
-      content="The best web-based Tic-Tac-Toe: unbeatable AI, four difficulty levels, variants, offline play."
+      content="The best web-based Tic-Tac-Toe: an unbeatable AI with four difficulty levels, Misère, 4×4, 5×5 and Ultimate variants, hints, analysis, and full offline play."
     />
     <meta name="theme-color" content="#0f172a" />
+    <meta name="color-scheme" content="light dark" />
+    <meta property="og:title" content="Tic-Tac-Toe: The Game" />
+    <meta
+      property="og:description"
+      content="Unbeatable AI, four difficulty levels, Misère and Ultimate variants, hints and analysis. Plays offline."
+    />
+    <meta property="og:type" content="website" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <title>Tic-Tac-Toe: The Game</title>
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <p style="font-family: system-ui; padding: 1rem">
+        Tic-Tac-Toe needs JavaScript to run. Please enable it and reload.
+      </p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
