@@ -5,11 +5,14 @@ describe('parseSettings', () => {
   it('fills defaults for missing or invalid fields', () => {
     expect(parseSettings(null)).toBeNull();
     expect(parseSettings({})).toEqual(DEFAULT_SETTINGS);
-    expect(parseSettings({ theme: 'dark', locale: 'fr', sound: false, seenTour: true })).toEqual({
+    expect(
+      parseSettings({ theme: 'dark', locale: 'fr', sound: false, seenTour: true, hotSeat: true }),
+    ).toEqual({
       theme: 'dark',
       locale: 'fr',
       sound: false,
       seenTour: true,
+      hotSeat: true,
     });
     expect(parseSettings({ theme: 'neon', locale: 'es', sound: 'yes', seenTour: 1 })).toEqual(
       DEFAULT_SETTINGS,

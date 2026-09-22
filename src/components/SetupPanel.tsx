@@ -6,10 +6,12 @@ import { Segmented } from './Segmented.tsx';
 interface Props {
   config: MatchConfig;
   onChange: (patch: Partial<MatchConfig>) => void;
+  hotSeat: boolean;
+  onHotSeat: (on: boolean) => void;
 }
 
 /** Mode / variant / side / difficulty pickers. Any change starts a fresh game. */
-export function SetupPanel({ config, onChange }: Props) {
+export function SetupPanel({ config, onChange, hotSeat, onHotSeat }: Props) {
   const t = useT();
   const difficultyOptions = DIFFICULTIES.map((d) => ({
     value: d,
@@ -35,6 +37,17 @@ export function SetupPanel({ config, onChange }: Props) {
         }))}
         onChange={(variant) => onChange({ variant })}
       />
+      {config.mode === 'hvh' && (
+        <label className="checkbox">
+          <input
+            type="checkbox"
+            checked={hotSeat}
+            onChange={(e) => onHotSeat(e.target.checked)}
+            data-testid="hot-seat"
+          />
+          <span>{t('setup.hotSeat')}</span>
+        </label>
+      )}
       {config.mode === 'hva' && (
         <>
           <Segmented<Player>

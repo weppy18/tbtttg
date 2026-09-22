@@ -169,6 +169,12 @@ export const en = {
   'tour.tools.body':
     'Stuck? Press H for a hint. After a game, analyse it to see your mistakes, share it by link, or watch the replay.',
 
+  // Hot seat
+  'shield.title': 'Pass the device',
+  'shield.pass': "Pass the device to {player}. Tap when you're ready.",
+  'shield.continue': "I'm ready",
+  'setup.hotSeat': 'Hide board between turns (pass-and-play)',
+
   // Series
   'series.title': 'Series',
   'series.bestOf': 'Best of {n}',

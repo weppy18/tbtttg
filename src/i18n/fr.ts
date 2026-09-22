@@ -159,6 +159,11 @@ export const fr: Record<MessageKey, string> = {
   'tour.tools.body':
     'Bloqué ? Appuyez sur H pour un indice. Après une partie, analysez-la pour voir vos erreurs, partagez-la par lien ou regardez la relecture.',
 
+  'shield.title': "Passez l'appareil",
+  'shield.pass': "Passez l'appareil à {player}. Touchez quand vous êtes prêt.",
+  'shield.continue': 'Je suis prêt',
+  'setup.hotSeat': 'Masquer la grille entre les tours (jeu à tour de rôle)',
+
   'series.title': 'Série',
   'series.bestOf': 'Meilleur des {n}',
   'series.game': 'Partie {n}',

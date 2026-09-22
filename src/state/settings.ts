@@ -9,6 +9,8 @@ export interface Settings {
   readonly locale: Locale | null; // null = auto-detect
   readonly sound: boolean;
   readonly seenTour: boolean;
+  /** Two-player mode: hide the board between turns so the device can be passed. */
+  readonly hotSeat: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -16,6 +18,7 @@ export const DEFAULT_SETTINGS: Settings = {
   locale: null,
   sound: true,
   seenTour: false,
+  hotSeat: false,
 };
 
 export function parseSettings(raw: unknown): Settings | null {
@@ -25,5 +28,6 @@ export function parseSettings(raw: unknown): Settings | null {
     locale: isLocale(raw.locale) ? raw.locale : null,
     sound: typeof raw.sound === 'boolean' ? raw.sound : DEFAULT_SETTINGS.sound,
     seenTour: raw.seenTour === true,
+    hotSeat: raw.hotSeat === true,
   };
 }

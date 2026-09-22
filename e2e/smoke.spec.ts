@@ -376,3 +376,20 @@ test('tournament: best-of-3 alternates sides, keeps score, and declares a series
   await expect(status(page)).toHaveText('Alice wins the series 2–1!');
   await expect(page.getByTestId('new-game')).toHaveText('New series');
 });
+
+test('hot seat: the board hides between turns until the next player is ready', async ({ page }) => {
+  await setMode(page, 'Two players');
+  await page.getByTestId('hot-seat').check();
+  await cell(page, 1, 1).click();
+  await expect(page.getByTestId('shield')).toBeVisible();
+  await expect(page.getByTestId('shield')).toContainText('Pass the device to O');
+  await page.getByTestId('shield-continue').click();
+  await expect(page.getByTestId('shield')).toBeHidden();
+  await cell(page, 2, 2).click();
+  await expect(page.getByTestId('shield')).toContainText('Pass the device to X');
+  await page.keyboard.press('Enter'); // the continue button is focused
+  await expect(page.getByTestId('shield')).toBeHidden();
+  await page.getByTestId('hot-seat').uncheck();
+  await cell(page, 1, 2).click();
+  await expect(page.getByTestId('shield')).toBeHidden();
+});

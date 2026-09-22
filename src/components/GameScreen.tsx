@@ -29,6 +29,8 @@ import { SetupPanel } from './SetupPanel.tsx';
 import { PlayersPanel } from './PlayersPanel.tsx';
 import { SwapContext, useEffectiveProfile } from '../state/swapContext.ts';
 import { SeriesPanel } from './SeriesPanel.tsx';
+import { TurnShield } from './TurnShield.tsx';
+import { useSettings } from '../state/settingsContext.ts';
 import { seatOf, seriesWinner, type MatchState } from '../state/match.ts';
 import type { Player } from '../engine/index.ts';
 
@@ -129,6 +131,13 @@ function GameScreenInner({
   const { match, game, undo, redo, newGame } = m;
   const { announce, message, nonce } = useAnnouncer();
   const name = useNames(match.config);
+  const { settings, update } = useSettings();
+  // Hot seat: after each two-player move, hide the board until the next player is ready.
+  const hotSeat = settings.hotSeat && match.config.mode === 'hvh';
+  const [shieldKey, setShieldKey] = useState<string | null>(null);
+  const positionKey = `${match.gameId}:${match.cursor}`;
+  const shieldOpen =
+    hotSeat && game.status === 'playing' && match.cursor > 0 && shieldKey !== positionKey;
   const gameStatus = useStatus(match.config, game, m.aiThinking);
   const seriesStatus = useSeriesStatus(match, name);
   const status = seriesStatus ?? gameStatus;
@@ -295,7 +304,13 @@ function GameScreenInner({
               : t('ultimate.sentTo', { n: game.activeBoard + 1 })}
           </p>
         )}
-        <div className="board-wrap">
+        <div className={`board-wrap${shieldOpen ? ' board-wrap--hidden' : ''}`}>
+          {shieldOpen && (
+            <TurnShield
+              playerName={name(game.toMove)}
+              onContinue={() => setShieldKey(positionKey)}
+            />
+          )}
           {game.kind === 'board' ? (
             <Board
               game={game}
@@ -420,7 +435,12 @@ function GameScreenInner({
         <p className="muted small">{t('keyboard.help')}</p>
       </section>
       <aside className="game__side">
-        <SetupPanel config={match.config} onChange={(patch) => m.newGame(patch)} />
+        <SetupPanel
+          config={match.config}
+          onChange={(patch) => m.newGame(patch)}
+          hotSeat={settings.hotSeat}
+          onHotSeat={(hotSeat) => update({ hotSeat })}
+        />
         <SeriesPanel match={match} name={name} onStart={m.startSeries} onEnd={m.endSeries} />
         <Scoreboard stats={stats} config={match.config} onReset={resetStats} />
         <SwapContext.Provider value={false}>
