@@ -16,6 +16,8 @@ export interface BoardProps {
   hint?: number | null;
   /** Per-cell annotation classes (analysis view), keyed by cell index. */
   annotations?: ReadonlyMap<number, string>;
+  /** Small text badges shown in empty cells (explorer view). */
+  overlays?: ReadonlyMap<number, { text: string; cls: string }>;
   /** Bumps on new game so entrance animations reset. */
   gameId: number;
 }
@@ -28,6 +30,7 @@ export function Board({
   invalid,
   hint = null,
   annotations,
+  overlays,
   gameId,
 }: BoardProps) {
   const t = useT();
@@ -107,6 +110,7 @@ export function Board({
       {game.board.map((cell, i) => {
         const [row, col] = toRowCol(i, size);
         const inLine = line?.includes(i) ?? false;
+        const overlay = cell === null ? overlays?.get(i) : undefined;
         const cls = [
           'cell',
           cell ? `cell--${cell.toLowerCase()}` : 'cell--empty',
@@ -114,12 +118,13 @@ export function Board({
           i === lastMove ? 'cell--last' : '',
           i === hint ? 'cell--hint' : '',
           annotations?.get(i) ?? '',
+          overlay?.cls ?? '',
         ]
           .filter(Boolean)
           .join(' ');
         const label = `${t('board.cell', { row: row + 1, col: col + 1 })}, ${
           cell ? t('board.cell.mark', { mark: cell }) : t('board.cell.empty')
-        }`;
+        }${overlay ? `, ${overlay.text}` : ''}`;
         return (
           <button
             key={`${gameId}-${i}`}
@@ -139,6 +144,11 @@ export function Board({
             }}
           >
             {cell && <Mark player={cell} animate={i === lastMove} />}
+            {overlay && (
+              <span className="cell__overlay" aria-hidden="true">
+                {overlay.text}
+              </span>
+            )}
           </button>
         );
       })}

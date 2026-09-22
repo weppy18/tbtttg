@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { GameScreen } from './components/GameScreen.tsx';
 import { Header, type View } from './components/Header.tsx';
 import { PuzzleScreen } from './components/PuzzleScreen.tsx';
+import { ExplorerScreen } from './components/ExplorerScreen.tsx';
 import { Tour } from './components/Tour.tsx';
 import { PwaStatus } from './components/PwaStatus.tsx';
 import { ErrorBoundary } from './components/ErrorBoundary.tsx';
@@ -39,7 +40,13 @@ function Shell() {
         <Header locale={locale} view={view} onView={setView} />
         <Tour open={!settings.seenTour} onDone={() => update({ seenTour: true })} />
         <main className="main">
-          {view === 'daily' ? <PuzzleScreen onBack={() => setView('play')} /> : <GameScreen />}
+          {view === 'daily' ? (
+            <PuzzleScreen onBack={() => setView('play')} />
+          ) : view === 'explore' ? (
+            <ExplorerScreen onBack={() => setView('play')} />
+          ) : (
+            <GameScreen />
+          )}
         </main>
         <PwaStatus />
       </div>

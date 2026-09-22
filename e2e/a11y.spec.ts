@@ -58,6 +58,16 @@ for (const theme of ['light', 'dark'] as const) {
   });
 }
 
+test('puzzle and explorer screens have no axe violations', async ({ page }) => {
+  await page.getByTestId('nav-daily').click();
+  await expect(page.getByTestId('puzzle')).toBeVisible();
+  await audit(page, 'daily puzzle');
+  await page.getByTestId('nav-explore').click();
+  await expect(page.getByTestId('explorer')).toBeVisible();
+  await page.locator('[data-index="4"]').click();
+  await audit(page, 'explorer');
+});
+
 test('first-run tour dialog has no axe violations', async ({ page }) => {
   await page.evaluate(() => localStorage.clear());
   await page.reload();

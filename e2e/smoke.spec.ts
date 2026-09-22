@@ -393,3 +393,29 @@ test('hot seat: the board hides between turns until the next player is ready', a
   await cell(page, 1, 2).click();
   await expect(page.getByTestId('shield')).toBeHidden();
 });
+
+test('opening explorer labels every reply and the best line ends in a draw', async ({ page }) => {
+  await page.getByTestId('nav-explore').click();
+  await expect(page.getByTestId('explorer')).toBeVisible();
+  await expect(page.getByTestId('explorer-status')).toHaveText('X to move — Draw with best play');
+  await expect(page.getByTestId('explorer-counts')).toHaveText(
+    '0 winning, 9 drawing, 0 losing moves',
+  );
+  await expect(page.getByTestId('board').locator('.cell--eval-draw')).toHaveCount(9);
+  // X corner, O centre, X opposite corner: now O has 4 drawing edges and 4 losing corners... (2 empty corners)
+  await cell(page, 1, 1).click();
+  await cell(page, 2, 2).click();
+  await cell(page, 3, 3).click();
+  await expect(page.getByTestId('explorer-counts')).toHaveText(
+    '0 winning, 4 drawing, 2 losing moves',
+  );
+  await expect(page.getByTestId('board').locator('.cell--eval-loss')).toHaveCount(2);
+  await page.getByTestId('crumbs').getByRole('button', { name: 'Start' }).click();
+  await expect(page.getByTestId('board').locator('.cell--eval-draw')).toHaveCount(9);
+  await page.getByTestId('best-line').click();
+  await expect(page.getByTestId('explorer-status')).toHaveText('Draw.');
+  await page.getByRole('radio', { name: 'Misère 3×3' }).check();
+  await expect(page.getByTestId('explorer-counts')).toContainText('drawing');
+  await page.getByTestId('back').click();
+  await expect(page.getByTestId('board')).toBeVisible();
+});

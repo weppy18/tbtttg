@@ -159,6 +159,20 @@ export const fr: Record<MessageKey, string> = {
   'tour.tools.body':
     'Bloqué ? Appuyez sur H pour un indice. Après une partie, analysez-la pour voir vos erreurs, partagez-la par lien ou regardez la relecture.',
 
+  'explorer.title': "Explorateur d'ouvertures",
+  'explorer.value': '{player} au trait — {outcome}',
+  'explorer.win': 'Victoire pour le camp au trait',
+  'explorer.draw': 'Nulle avec le meilleur jeu',
+  'explorer.loss': 'Défaite pour le camp au trait',
+  'explorer.win.short': 'V',
+  'explorer.draw.short': 'N',
+  'explorer.loss.short': 'D',
+  'explorer.counts': '{win} coups gagnants, {draw} nuls, {loss} perdants',
+  'explorer.bestLine': 'Jouer la meilleure ligne',
+  'explorer.how':
+    'Cliquez une case pour explorer cette ligne. Les étiquettes indiquent le résultat de chaque coup si les deux camps jouent ensuite parfaitement.',
+  'nav.explore': 'Explorateur',
+
   'shield.title': "Passez l'appareil",
   'shield.pass': "Passez l'appareil à {player}. Touchez quand vous êtes prêt.",
   'shield.continue': 'Je suis prêt',

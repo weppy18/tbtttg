@@ -169,6 +169,21 @@ export const en = {
   'tour.tools.body':
     'Stuck? Press H for a hint. After a game, analyse it to see your mistakes, share it by link, or watch the replay.',
 
+  // Explorer
+  'explorer.title': 'Opening explorer',
+  'explorer.value': '{player} to move — {outcome}',
+  'explorer.win': 'Win for the side to move',
+  'explorer.draw': 'Draw with best play',
+  'explorer.loss': 'Loss for the side to move',
+  'explorer.win.short': 'W',
+  'explorer.draw.short': 'D',
+  'explorer.loss.short': 'L',
+  'explorer.counts': '{win} winning, {draw} drawing, {loss} losing moves',
+  'explorer.bestLine': 'Play best line',
+  'explorer.how':
+    'Click any cell to explore that line. Labels show the result each move leads to, assuming both sides then play perfectly.',
+  'nav.explore': 'Explorer',
+
   // Hot seat
   'shield.title': 'Pass the device',
   'shield.pass': "Pass the device to {player}. Tap when you're ready.",

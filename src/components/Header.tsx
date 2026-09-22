@@ -6,7 +6,7 @@ import { useState } from 'react';
 
 const THEME_ICON: Record<ThemeMode, string> = { light: '☀', dark: '☾', system: '◐' };
 
-export type View = 'play' | 'daily';
+export type View = 'play' | 'daily' | 'explore';
 
 export function Header({
   locale,
@@ -29,15 +29,20 @@ export function Header({
         <p className="header__tagline">{t('tagline')}</p>
       </div>
       <div className="header__actions">
-        <button
-          type="button"
-          className={`btn btn--small${view === 'daily' ? '' : ' btn--ghost'}`}
-          onClick={() => onView(view === 'daily' ? 'play' : 'daily')}
-          aria-pressed={view === 'daily'}
-          data-testid="nav-daily"
-        >
-          {view === 'daily' ? t('nav.play') : t('nav.daily')}
-        </button>
+        <nav className="header__nav" aria-label={t('nav.play')}>
+          {(['play', 'daily', 'explore'] as const).map((v) => (
+            <button
+              key={v}
+              type="button"
+              className={`btn btn--small${view === v ? '' : ' btn--ghost'}`}
+              onClick={() => onView(v)}
+              aria-pressed={view === v}
+              data-testid={`nav-${v}`}
+            >
+              {t(`nav.${v}`)}
+            </button>
+          ))}
+        </nav>
         <button
           type="button"
           className="icon-btn"
