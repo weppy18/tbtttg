@@ -1,0 +1,113 @@
+import type { MessageKey } from './en.ts';
+
+export const fr: Record<MessageKey, string> = {
+  appTitle: 'Morpion',
+  tagline: 'Le jeu, perfectionné.',
+
+  'mode.hvh': 'Deux joueurs',
+  'mode.hva': "Contre l'IA",
+  'mode.ava': 'Regarder IA contre IA',
+  'mode.label': 'Mode',
+
+  'difficulty.label': 'Difficulté',
+  'difficulty.easy': 'Facile',
+  'difficulty.medium': 'Moyen',
+  'difficulty.hard': 'Difficile',
+  'difficulty.impossible': 'Imbattable',
+  'difficulty.easy.hint': 'Joue sans rigueur. Parfait pour les enfants et les premières parties.',
+  'difficulty.medium.hint': 'Bloque et gagne quand il le peut, mais commet parfois des erreurs.',
+  'difficulty.hard.hint': 'Tactique solide — battez-le avec une fourchette.',
+  'difficulty.impossible.hint': 'Jeu parfait. Au mieux, vous ferez match nul.',
+  'difficulty.x': 'Difficulté de X',
+  'difficulty.o': 'Difficulté de O',
+
+  'side.label': 'Vous jouez',
+  'side.x': 'X (premier)',
+  'side.o': 'O (second)',
+
+  'variant.label': 'Variante',
+  'variant.classic': 'Classique 3×3',
+  'variant.misere': 'Misère 3×3',
+  'variant.four': '4×4',
+  'variant.five': '5×5',
+  'variant.ultimate': 'Ultime',
+  'variant.classic.rules':
+    'Alignez trois de vos symboles — horizontalement, verticalement ou en diagonale.',
+  'variant.misere.rules':
+    'Morpion inversé : le joueur qui aligne trois symboles PERD. Évitez les lignes !',
+  'variant.four.rules': 'Une grille 4×4. Alignez-en quatre pour gagner.',
+  'variant.five.rules':
+    'Une grille 5×5 où quatre alignés suffisent — plus de place pour la tactique.',
+  'variant.ultimate.rules':
+    'Neuf petites grilles dans une grande. Votre coup envoie votre adversaire dans la petite grille correspondant à la case jouée. Gagnez trois petites grilles alignées pour remporter la partie.',
+
+  'status.toMove': 'Au tour de {player}',
+  'status.yourTurn': 'À vous ({player})',
+  'status.aiThinking': "L'IA réfléchit…",
+  'status.win': '{player} gagne !',
+  'status.youWin': 'Vous gagnez !',
+  'status.youLose': "L'IA gagne.",
+  'status.draw': 'Match nul.',
+  'status.misereWin': '{loser} a aligné trois symboles — {player} gagne !',
+
+  'board.label': 'Grille {name}, {size} sur {size}',
+  'board.cell': 'Ligne {row}, colonne {col}',
+  'board.cell.empty': 'vide',
+  'board.cell.mark': '{mark}',
+  'board.invalid': 'Cette case est déjà prise.',
+  'board.gameOver': 'La partie est terminée. Lancez une nouvelle partie pour continuer.',
+  'announce.move': '{player} a joué ligne {row}, colonne {col}.',
+  'announce.aiMove': "L'IA ({player}) a joué ligne {row}, colonne {col}.",
+  'announce.win': '{player} gagne avec une ligne.',
+  'announce.draw': 'La partie est nulle.',
+  'announce.newGame': 'Nouvelle partie. Au tour de {player}.',
+  'announce.undo': 'Coup annulé.',
+  'announce.redo': 'Coup rejoué.',
+
+  'action.newGame': 'Nouvelle partie',
+  'action.restart': 'Recommencer',
+  'action.undo': 'Annuler',
+  'action.redo': 'Rétablir',
+  'action.hint': 'Indice',
+  'action.playAgain': 'Rejouer',
+  'action.rematch': 'Revanche (changer de côté)',
+  'action.analyse': 'Analyser la partie',
+  'action.share': 'Partager',
+  'action.copied': 'Lien copié !',
+  'action.replay': 'Revoir',
+  'action.settings': 'Réglages',
+  'action.close': 'Fermer',
+  'action.howToPlay': 'Comment jouer',
+  'action.resetStats': 'Réinitialiser les scores',
+  'action.mute': 'Couper le son',
+  'action.unmute': 'Activer le son',
+
+  'theme.label': 'Thème',
+  'theme.light': 'Clair',
+  'theme.dark': 'Sombre',
+  'theme.system': 'Système',
+
+  'language.label': 'Langue',
+
+  'stats.title': 'Tableau des scores',
+  'stats.wins': 'Victoires',
+  'stats.losses': 'Défaites',
+  'stats.draws': 'Nuls',
+  'stats.x': 'Victoires de X',
+  'stats.o': 'Victoires de O',
+  'stats.streak': 'Série',
+  'stats.bestStreak': 'Meilleure série',
+  'stats.games': 'Parties',
+  'stats.empty': 'Aucune partie pour le moment — jouez-en une !',
+
+  'history.title': 'Coups',
+  'history.move': 'Coup {n} : {player} en ligne {row}, colonne {col}',
+  'history.start': 'Début',
+  'history.jumpTo': 'Aller au coup {n}',
+
+  'offline.ready': 'Prêt à jouer hors ligne.',
+  'update.available': 'Mise à jour disponible',
+  'update.reload': 'Recharger',
+  'keyboard.help':
+    'Clavier : flèches pour se déplacer, Entrée ou Espace pour jouer, 1–9 pour choisir une case, U pour annuler.',
+};
