@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { Player } from '../engine/index.ts';
 import { isStrokeMark } from '../state/profiles.ts';
 import { useProfiles } from '../state/profilesContext.ts';
@@ -12,7 +13,7 @@ interface Props {
  * A player's mark: X/O drawn as SVG strokes so they animate in and scale
  * crisply, or the player's chosen glyph (emoji/text) rendered as text.
  */
-export function Mark({ player, animate = false }: Props) {
+export const Mark = memo(function Mark({ player, animate = false }: Props) {
   const { profiles } = useProfiles();
   const glyph = profiles[player].mark;
   const cls = `mark mark--${player.toLowerCase()}${animate ? ' mark--enter' : ''}`;
@@ -36,4 +37,4 @@ export function Mark({ player, animate = false }: Props) {
       <circle className="mark__stroke mark__stroke--o" cx="50" cy="50" r="30" />
     </svg>
   );
-}
+});

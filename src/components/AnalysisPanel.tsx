@@ -1,10 +1,11 @@
+import { memo } from 'react';
 import type { GameAnalysis, MoveQuality, Player } from '../engine/index.ts';
 import { useT } from '../i18n/index.ts';
 
 const ORDER: readonly MoveQuality[] = ['blunder', 'mistake', 'inaccuracy', 'good', 'best'];
 
 /** Per-player move-quality summary shown after "Analyse game". */
-export function AnalysisPanel({ analysis }: { analysis: GameAnalysis }) {
+export const AnalysisPanel = memo(function AnalysisPanel({ analysis }: { analysis: GameAnalysis }) {
   const t = useT();
   const line = (player: Player) => {
     const counts = analysis.summary[player];
@@ -23,4 +24,4 @@ export function AnalysisPanel({ analysis }: { analysis: GameAnalysis }) {
       <p className="muted small">{t('analysis.legend')}</p>
     </section>
   );
-}
+});
