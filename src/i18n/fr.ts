@@ -159,6 +159,24 @@ export const fr: Record<MessageKey, string> = {
   'tour.tools.body':
     'Bloqué ? Appuyez sur H pour un indice. Après une partie, analysez-la pour voir vos erreurs, partagez-la par lien ou regardez la relecture.',
 
+  'puzzle.title': 'Casse-tête',
+  'puzzle.daily': 'Casse-tête du jour',
+  'puzzle.practice': "Casse-tête d'entraînement",
+  'puzzle.prompt': '{player} joue et gagne. Trouvez le seul coup gagnant.',
+  'puzzle.correct': "Correct ! C'est le coup gagnant.",
+  'puzzle.wrong': 'Pas celui-là. Réessayez.',
+  'puzzle.revealed': 'Solution affichée.',
+  'puzzle.solvedToday': 'Vous avez déjà résolu le casse-tête du jour. Revenez demain !',
+  'puzzle.reveal': 'Voir la solution',
+  'puzzle.another': 'Un autre',
+  'puzzle.backToDaily': 'Retour à celui du jour',
+  'puzzle.back': 'Retour au jeu',
+  'puzzle.solved': 'Résolus',
+  'puzzle.how':
+    "Un nouveau casse-tête chaque jour, le même pour tout le monde. Deux erreurs révèlent un indice ; trois débloquent la solution. Les casse-têtes d'entraînement sont illimités.",
+  'nav.daily': 'Casse-tête du jour',
+  'nav.play': 'Jouer',
+
   'offline.ready': 'Prêt à jouer hors ligne.',
   'update.available': 'Mise à jour disponible',
   'update.reload': 'Recharger',

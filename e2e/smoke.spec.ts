@@ -293,3 +293,32 @@ test('service worker registers and the app loads from cache offline', async ({ p
   await expect(page.locator('.cell')).toHaveCount(9);
   await context.setOffline(false);
 });
+
+test('daily puzzle: wrong tries reveal a hint, the solution solves it, and progress persists', async ({
+  page,
+}) => {
+  await page.getByTestId('nav-daily').click();
+  await expect(page.getByTestId('puzzle')).toBeVisible();
+  await expect(page.getByTestId('puzzle-status')).toContainText('to play and win');
+  // Try every empty cell in order until the puzzle reports success; the hint appears after two misses.
+  const empties = await page
+    .locator('.cell--empty')
+    .evaluateAll((els) => els.map((e) => Number((e as HTMLElement).dataset.index)));
+  let wrong = 0;
+  for (const i of empties) {
+    await page.locator(`[data-index="${i}"]`).click({ force: true });
+    const text = await page.getByTestId('puzzle-status').innerText();
+    if (text.includes('Correct')) break;
+    wrong++;
+    if (wrong === 2) await expect(page.locator('.cell--hint')).toHaveCount(1);
+  }
+  await expect(page.getByTestId('puzzle-status')).toContainText('Correct');
+  await expect(page.getByTestId('puzzle').locator('.stat dd').first()).toHaveText('1');
+  await page.reload();
+  await page.getByTestId('nav-daily').click();
+  await expect(page.getByTestId('puzzle-status')).toContainText('already solved');
+  await page.getByTestId('practice').click();
+  await expect(page.getByTestId('puzzle-status')).toContainText('to play and win');
+  await page.getByTestId('back').click();
+  await expect(page.getByTestId('board')).toBeVisible();
+});

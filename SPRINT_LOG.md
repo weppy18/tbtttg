@@ -16,3 +16,4 @@
 | 1h08m | Phases 0-2 complete. NEVER-DONE #1: Playwright play-test 20 games across modes/variants, fix bugs found |
 | 1h15m | Play-test suite green (no bugs found). NEVER-DONE #2: axe-core accessibility audit |
 | 1h14m | axe audit green. NEVER-DONE #3: bundle-size report + memoised leaf components |
+| 1h16m | Bundle report committed. NEVER-DONE #4: daily challenge (seeded puzzle of the day) |

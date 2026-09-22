@@ -1000,3 +1000,12 @@ button {
   padding: 24px;
   text-align: center;
 }
+
+/* ---------- Puzzle ---------- */
+.puzzle__title {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+}

@@ -6,7 +6,17 @@ import { useState } from 'react';
 
 const THEME_ICON: Record<ThemeMode, string> = { light: '☀', dark: '☾', system: '◐' };
 
-export function Header({ locale }: { locale: Locale }) {
+export type View = 'play' | 'daily';
+
+export function Header({
+  locale,
+  view,
+  onView,
+}: {
+  locale: Locale;
+  view: View;
+  onView: (view: View) => void;
+}) {
   const t = useT();
   const { settings, update } = useSettings();
   const nextTheme = THEME_MODES[(THEME_MODES.indexOf(settings.theme) + 1) % THEME_MODES.length]!;
@@ -19,6 +29,15 @@ export function Header({ locale }: { locale: Locale }) {
         <p className="header__tagline">{t('tagline')}</p>
       </div>
       <div className="header__actions">
+        <button
+          type="button"
+          className={`btn btn--small${view === 'daily' ? '' : ' btn--ghost'}`}
+          onClick={() => onView(view === 'daily' ? 'play' : 'daily')}
+          aria-pressed={view === 'daily'}
+          data-testid="nav-daily"
+        >
+          {view === 'daily' ? t('nav.play') : t('nav.daily')}
+        </button>
         <button
           type="button"
           className="icon-btn"

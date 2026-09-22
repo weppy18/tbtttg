@@ -169,6 +169,25 @@ export const en = {
   'tour.tools.body':
     'Stuck? Press H for a hint. After a game, analyse it to see your mistakes, share it by link, or watch the replay.',
 
+  // Puzzle
+  'puzzle.title': 'Puzzle',
+  'puzzle.daily': 'Daily puzzle',
+  'puzzle.practice': 'Practice puzzle',
+  'puzzle.prompt': '{player} to play and win. Find the only winning move.',
+  'puzzle.correct': 'Correct! That is the winning move.',
+  'puzzle.wrong': 'Not that one. Try again.',
+  'puzzle.revealed': 'Solution shown.',
+  'puzzle.solvedToday': "You already solved today's puzzle. Come back tomorrow!",
+  'puzzle.reveal': 'Show solution',
+  'puzzle.another': 'Another puzzle',
+  'puzzle.backToDaily': "Back to today's",
+  'puzzle.back': 'Back to game',
+  'puzzle.solved': 'Solved',
+  'puzzle.how':
+    'A new puzzle every day, the same for everyone. Two wrong tries reveal a hint; three unlock the solution. Practice puzzles are unlimited.',
+  'nav.daily': 'Daily puzzle',
+  'nav.play': 'Play',
+
   // Misc
   'offline.ready': 'Ready to play offline.',
   'update.available': 'Update available',

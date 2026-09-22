@@ -1,6 +1,7 @@
-import { useEffect, type CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { GameScreen } from './components/GameScreen.tsx';
-import { Header } from './components/Header.tsx';
+import { Header, type View } from './components/Header.tsx';
+import { PuzzleScreen } from './components/PuzzleScreen.tsx';
 import { Tour } from './components/Tour.tsx';
 import { PwaStatus } from './components/PwaStatus.tsx';
 import { ErrorBoundary } from './components/ErrorBoundary.tsx';
@@ -33,6 +34,7 @@ function Shell() {
   }, []);
   const locale = settings.locale ?? detectLocale(navigator.languages ?? [navigator.language]);
   const { profiles } = useProfiles();
+  const [view, setView] = useState<View>('play');
   const colours = {
     ...(profiles.X.color ? { '--x': profiles.X.color } : {}),
     ...(profiles.O.color ? { '--o': profiles.O.color } : {}),
@@ -40,10 +42,10 @@ function Shell() {
   return (
     <I18nProvider locale={locale}>
       <div className="app" lang={locale} style={colours}>
-        <Header locale={locale} />
+        <Header locale={locale} view={view} onView={setView} />
         <Tour open={!settings.seenTour} onDone={() => update({ seenTour: true })} />
         <main className="main">
-          <GameScreen />
+          {view === 'daily' ? <PuzzleScreen onBack={() => setView('play')} /> : <GameScreen />}
         </main>
         <PwaStatus />
       </div>
