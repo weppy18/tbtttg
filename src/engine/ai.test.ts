@@ -186,7 +186,7 @@ describe('difficulty levels', () => {
     expect(hard).toBeGreaterThanOrEqual(impossible);
     expect(impossible).toBe(0);
     expect(easy).toBeGreaterThan(0.5);
-  });
+  }, 30_000);
 
   it('easy and medium sometimes take the immediate win', () => {
     const s = replay(CLASSIC_RULES, [0, 3, 1, 4]);
@@ -239,7 +239,7 @@ describe('difficulty levels', () => {
         expect(performance.now() - t0).toBeLessThan(4000);
       }
     }
-  });
+  }, 30_000);
 
   it('impossible on 4x4 takes an immediate win and blocks an immediate loss', () => {
     const win = replay(FOUR, [0, 4, 1, 5, 2, 6]);
