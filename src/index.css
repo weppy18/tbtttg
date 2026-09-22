@@ -14,10 +14,13 @@
   --surface: #ffffff;
   --surface-2: #ecebe4;
   --border: #dedcd3;
-  --x: #0e7fc7;
-  --o: #d9376e;
+  --x: #0b6fb0;
+  --o: #c4285c;
   --win: #e0a300;
-  --accent: #0e7fc7;
+  /* Text-safe variant of the win colour (4.5:1 on light surfaces). */
+  --win-text: #8a6400;
+  --good: #17804f;
+  --accent: #0b6fb0;
   --accent-fg: #ffffff;
   --shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 8px 24px -12px rgb(0 0 0 / 0.18);
   --focus: #e0a300;
@@ -35,6 +38,8 @@
   --x: #4cc3ff;
   --o: #ff6b95;
   --win: #ffc933;
+  --win-text: #ffc933;
+  --good: #34d399;
   --accent: #4cc3ff;
   --accent-fg: #06101f;
   --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 12px 32px -12px rgb(0 0 0 / 0.6);
@@ -175,7 +180,7 @@ button {
   transition: color var(--dur) var(--ease);
 }
 .status--won {
-  color: var(--win);
+  color: var(--win-text);
 }
 .status--draw {
   color: var(--muted);
@@ -305,7 +310,7 @@ button {
 
 /* Analysis annotations */
 .cell--best {
-  box-shadow: inset 0 0 0 3px #34d399;
+  box-shadow: inset 0 0 0 3px var(--good);
 }
 .cell--inaccuracy {
   box-shadow: inset 0 0 0 3px var(--win);
@@ -570,7 +575,7 @@ button {
   font-variant-numeric: tabular-nums;
 }
 .stat--win dd {
-  color: #22a06b;
+  color: var(--good);
 }
 .stat--loss dd {
   color: var(--o);
@@ -627,10 +632,10 @@ button {
   background: var(--surface-2);
 }
 .history__item.cell--best .history__note {
-  color: #22a06b;
+  color: var(--good);
 }
 .history__item.cell--inaccuracy .history__note {
-  color: var(--win);
+  color: var(--win-text);
 }
 .history__item.cell--blunder .history__note {
   color: var(--o);
