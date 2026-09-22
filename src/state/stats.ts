@@ -1,4 +1,4 @@
-import type { GameState, Player } from '../engine/index.ts';
+import type { AnyGame, Player } from '../engine/index.ts';
 import { isRecord } from '../lib/storage.ts';
 import type { MatchConfig } from './match.ts';
 
@@ -37,7 +37,7 @@ export function statsKey(config: MatchConfig): string {
   }
 }
 
-export function recordResult(tally: Tally, game: GameState): Tally {
+export function recordResult(tally: Tally, game: AnyGame): Tally {
   if (game.status === 'won' && game.winner) {
     const w = game.winner;
     const streak = tally.streakPlayer === w ? tally.streak + 1 : 1;
@@ -56,7 +56,7 @@ export function recordResult(tally: Tally, game: GameState): Tally {
   return tally;
 }
 
-export function recordGame(stats: Stats, config: MatchConfig, game: GameState): Stats {
+export function recordGame(stats: Stats, config: MatchConfig, game: AnyGame): Stats {
   const key = statsKey(config);
   return { ...stats, [key]: recordResult(stats[key] ?? EMPTY_TALLY, game) };
 }

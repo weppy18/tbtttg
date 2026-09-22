@@ -18,6 +18,7 @@ export type GameStatus = 'playing' | 'won' | 'draw';
 
 /** Immutable snapshot of a game. Never mutate — every engine function returns a new state. */
 export interface GameState {
+  readonly kind: 'board';
   readonly rules: Rules;
   /** Row-major cells, length size*size. */
   readonly board: readonly Cell[];

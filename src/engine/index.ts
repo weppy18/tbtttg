@@ -6,3 +6,4 @@ export * from './ai.ts';
 export * from './variants.ts';
 export * from './analysis.ts';
 export * from './ultimate.ts';
+export * from './adapter.ts';

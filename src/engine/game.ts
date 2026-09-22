@@ -29,6 +29,7 @@ export function assertRules(rules: Rules): void {
 export function createGame(rules: Rules = CLASSIC_RULES): GameState {
   assertRules(rules);
   return {
+    kind: 'board',
     rules,
     board: Array.from({ length: rules.size * rules.size }, (): Cell => null),
     toMove: 'X',

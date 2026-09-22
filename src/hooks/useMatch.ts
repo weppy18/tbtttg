@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
-import type { GameState } from '../engine/index.ts';
+import type { AnyGame } from '../engine/index.ts';
 import { requestMove } from '../lib/aiClient.ts';
 import { SHARE_PARAM, readSharedGame } from '../lib/share.ts';
 import { readJson, writeJson } from '../lib/storage.ts';
@@ -19,7 +19,7 @@ import {
 
 export interface MatchApi {
   match: MatchState;
-  game: GameState;
+  game: AnyGame;
   /** True while the AI's move is pending. */
   aiThinking: boolean;
   /** True when a human may click the board right now. */
@@ -41,7 +41,7 @@ function aiDelay(config: MatchConfig): number {
   return config.mode === 'ava' ? 650 : 380;
 }
 
-export function useMatch(onGameOver?: (config: MatchConfig, game: GameState) => void): MatchApi {
+export function useMatch(onGameOver?: (config: MatchConfig, game: AnyGame) => void): MatchApi {
   const [match, dispatch] = useReducer(matchReducer, undefined, () => {
     const config = readJson('config', parseConfig, DEFAULT_CONFIG);
     const shared = typeof location !== 'undefined' ? readSharedGame(location.href) : null;

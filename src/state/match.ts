@@ -1,13 +1,12 @@
 import {
   DIFFICULTIES,
-  applyMove,
-  createGame,
-  isLegalMove,
-  replay,
-  rulesFor,
+  applyVariantMove,
+  createVariant,
+  isLegalVariantMove,
   isVariantId,
+  replayVariant,
+  type AnyGame,
   type Difficulty,
-  type GameState,
   type Player,
   type VariantId,
 } from '../engine/index.ts';
@@ -60,8 +59,8 @@ export function initialMatch(config: MatchConfig = DEFAULT_CONFIG): MatchState {
 }
 
 /** The engine state at the current cursor. Cheap (≤ 25 moves), memoise in React. */
-export function currentGame(match: MatchState): GameState {
-  return replay(rulesFor(match.config.variant), match.moves.slice(0, match.cursor));
+export function currentGame(match: MatchState): AnyGame {
+  return replayVariant(match.config.variant, match.moves.slice(0, match.cursor));
 }
 
 /** Whether `player` is driven by the AI under this config. */
@@ -115,13 +114,7 @@ export function matchReducer(match: MatchState, action: MatchAction): MatchState
   switch (action.type) {
     case 'play': {
       const game = currentGame(match);
-      if (
-        game.status !== 'playing' ||
-        !Number.isInteger(action.index) ||
-        action.index < 0 ||
-        action.index >= game.board.length ||
-        game.board[action.index] !== null
-      ) {
+      if (!isLegalVariantMove(game, action.index)) {
         return {
           ...match,
           invalid: { index: action.index, nonce: (match.invalid?.nonce ?? 0) + 1 },
@@ -148,11 +141,11 @@ export function matchReducer(match: MatchState, action: MatchAction): MatchState
     }
     case 'load': {
       // Validate by replaying; keep only the legal prefix.
-      let game = createGame(rulesFor(action.config.variant));
+      let game = createVariant(action.config.variant);
       const valid: number[] = [];
       for (const m of action.moves) {
-        if (!isLegalMove(game, m)) break;
-        game = applyMove(game, m);
+        if (!isLegalVariantMove(game, m)) break;
+        game = applyVariantMove(game, m);
         valid.push(m);
       }
       const cursor =

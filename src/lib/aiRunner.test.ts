@@ -17,7 +17,6 @@ describe('runAiRequest', () => {
       kind: 'evaluate',
       variant: 'classic',
       moves: [0, 3, 1, 4],
-      options: {},
     });
     expect(ev.kind).toBe('evaluate');
     if (ev.kind === 'evaluate') expect(ev.evals[0]!.index).toBe(2);

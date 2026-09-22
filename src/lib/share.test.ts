@@ -9,6 +9,14 @@ describe('share codes', () => {
     expect(decodeGame('classic.')).toEqual({ variant: 'classic', moves: [] });
   });
 
+  it('encodes ultimate as board/cell pairs', () => {
+    const g = { variant: 'ultimate' as const, moves: [40, 36, 4, 80] };
+    expect(encodeGame(g)).toBe('ultimate.44400488');
+    expect(decodeGame('ultimate.44400488')).toEqual(g);
+    expect(decodeGame('ultimate.449')).toBeNull();
+    expect(decodeGame('ultimate.')).toEqual({ variant: 'ultimate', moves: [] });
+  });
+
   it('rejects garbage', () => {
     expect(decodeGame('nope.123')).toBeNull();
     expect(decodeGame('classic.1-2')).toBeNull();

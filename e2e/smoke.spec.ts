@@ -201,3 +201,24 @@ test('a shared link loads the game, replays it, and share copies a link', async 
   const clip = await page.evaluate(() => navigator.clipboard.readText());
   expect(clip).toContain('g=classic.03142');
 });
+
+test('ultimate: moves constrain the next board, AI replies, and a game can be watched', async ({
+  page,
+}) => {
+  await setMode(page, 'Two players');
+  await page.getByLabel('Ultimate').check();
+  await expect(page.locator('.cell')).toHaveCount(81);
+  await page.locator('[data-index="40"]').click(); // centre of centre board
+  await expect(page.getByTestId('ultimate-hint')).toHaveText('Must play in board 5');
+  await expect(page.locator('[data-active]')).toHaveCount(1);
+  // playing outside the active board is rejected
+  await page.locator('[data-index="0"]').click({ force: true });
+  await expect(page.locator('[data-mark="O"]')).toHaveCount(0);
+  await page.locator('[data-index="36"]').click(); // board 5, cell 1 -> sends X to board 1
+  await expect(page.getByTestId('ultimate-hint')).toHaveText('Must play in board 1');
+
+  await setMode(page, 'Watch AI vs AI');
+  await page.getByLabel('Easy', { exact: true }).nth(0).check();
+  await page.getByLabel('Easy', { exact: true }).nth(1).check();
+  await expect(status(page)).toHaveText(/wins|Draw/, { timeout: 90000 });
+});

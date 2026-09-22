@@ -9,6 +9,7 @@ import {
   createUltimate,
   evaluateUltimate,
   evaluateUltimateMoves,
+  globalRowCol,
   isLegalUltimateMove,
   legalUltimateMoves,
   replayUltimate,
@@ -123,6 +124,10 @@ describe('ultimate rules', () => {
   it('coordinates', () => {
     expect(boardOf(m(7, 2))).toBe(7);
     expect(cellOf(m(7, 2))).toBe(2);
+    expect(globalRowCol(m(0, 0))).toEqual([0, 0]);
+    expect(globalRowCol(m(4, 4))).toEqual([4, 4]);
+    expect(globalRowCol(m(8, 8))).toEqual([8, 8]);
+    expect(globalRowCol(m(5, 3))).toEqual([4, 6]);
   });
 });
 

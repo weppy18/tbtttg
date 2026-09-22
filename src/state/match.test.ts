@@ -34,8 +34,8 @@ describe('matchReducer', () => {
     const m = play(initialMatch(HVH), 4, 0);
     expect(m.cursor).toBe(2);
     const g = currentGame(m);
-    expect(g.board[4]).toBe('X');
-    expect(g.board[0]).toBe('O');
+    expect(g.kind === 'board' && g.board[4]).toBe('X');
+    expect(g.kind === 'board' && g.board[0]).toBe('O');
     expect(g.toMove).toBe('X');
   });
 
@@ -122,7 +122,8 @@ describe('matchReducer', () => {
     expect(n.gameId).toBe(1);
     expect(n.config.variant).toBe('five');
     expect(n.config.mode).toBe('ava');
-    expect(currentGame(n).board).toHaveLength(25);
+    const big = currentGame(n);
+    expect(big.kind === 'board' ? big.board.length : 0).toBe(25);
     expect(matchReducer(n, { type: 'newGame' }).gameId).toBe(2);
   });
 

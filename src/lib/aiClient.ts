@@ -1,10 +1,4 @@
-import type {
-  Difficulty,
-  GameAnalysis,
-  MoveEval,
-  SearchOptions,
-  VariantId,
-} from '../engine/index.ts';
+import type { Difficulty, GameAnalysis, MoveEval, VariantId } from '../engine/index.ts';
 import type { AiRequest, AiResponse } from '../workers/aiProtocol.ts';
 import { runAiRequest } from './aiRunner.ts';
 
@@ -88,10 +82,9 @@ export function requestMove(
 export function requestEvaluation(
   variant: VariantId,
   moves: readonly number[],
-  options: SearchOptions = {},
 ): Cancellable<MoveEval[]> {
   const id = nextId++;
-  const p = send({ id, kind: 'evaluate', variant, moves, options }).then((r) =>
+  const p = send({ id, kind: 'evaluate', variant, moves }).then((r) =>
     r.kind === 'evaluate' ? r.evals : [],
   );
   return cancellable(id, p);

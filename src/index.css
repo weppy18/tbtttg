@@ -665,3 +665,88 @@ button {
 .analysis__line {
   font-weight: 600;
 }
+
+/* ---------- Ultimate ---------- */
+.ultimate {
+  --gap: clamp(3px, 0.8vw, 6px);
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: calc(var(--gap) * 2);
+  width: 100%;
+  aspect-ratio: 1;
+  padding: calc(var(--gap) * 2);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  box-shadow: var(--shadow);
+  animation-duration: 380ms;
+  animation-timing-function: var(--ease);
+}
+.ultimate__board {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gap);
+  padding: var(--gap);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--border) 55%, var(--surface-2));
+  transition:
+    background-color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease),
+    opacity var(--dur) var(--ease);
+}
+.ultimate__board--active {
+  background: color-mix(in srgb, var(--accent) 22%, var(--surface-2));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+.ultimate__board .cell {
+  border-radius: 4px;
+  font-size: 0;
+}
+.ultimate__board .cell .mark {
+  width: 80%;
+  height: 80%;
+}
+.ultimate__board .cell .mark__stroke {
+  stroke-width: 14;
+}
+.ultimate__board--x .cell,
+.ultimate__board--o .cell,
+.ultimate__board--draw .cell {
+  opacity: 0.25;
+}
+.ultimate__board--x {
+  background: color-mix(in srgb, var(--x) 22%, var(--surface-2));
+}
+.ultimate__board--o {
+  background: color-mix(in srgb, var(--o) 22%, var(--surface-2));
+}
+.ultimate__board--win {
+  background: color-mix(in srgb, var(--win) 30%, var(--surface-2));
+}
+.ultimate__result {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.ultimate__result .mark {
+  width: 70%;
+  height: 70%;
+}
+.ultimate__board--x .ultimate__result {
+  color: var(--x);
+}
+.ultimate__board--o .ultimate__result {
+  color: var(--o);
+}
+.ultimate .board__line {
+  inset: calc(var(--gap) * 2);
+  width: calc(100% - var(--gap) * 4);
+  height: calc(100% - var(--gap) * 4);
+}
+.ultimate .cell--last::after {
+  inset: 2px;
+  border-width: 2px;
+}

@@ -42,6 +42,13 @@ export function toMove(board: number, cell: number): number {
   return board * 9 + cell;
 }
 
+/** Global 9x9 coordinates (0-based row, col) of a move. */
+export function globalRowCol(move: number): [number, number] {
+  const b = boardOf(move);
+  const c = cellOf(move);
+  return [Math.floor(b / 3) * 3 + Math.floor(c / 3), (b % 3) * 3 + (c % 3)];
+}
+
 export function createUltimate(): UltimateState {
   return {
     kind: 'ultimate',

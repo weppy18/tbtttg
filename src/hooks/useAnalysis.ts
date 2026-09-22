@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { analysisOptions, rulesFor, type GameAnalysis, type VariantId } from '../engine/index.ts';
+import type { GameAnalysis, VariantId } from '../engine/index.ts';
 import { requestAnalysis, requestEvaluation } from '../lib/aiClient.ts';
 
 interface HintState {
@@ -34,11 +34,7 @@ export function useAnalysis(
 
   const requestHint = useCallback(() => {
     const key = positionKey;
-    const req = requestEvaluation(
-      variant,
-      moves.slice(0, cursor),
-      analysisOptions(rulesFor(variant)),
-    );
+    const req = requestEvaluation(variant, moves.slice(0, cursor));
     cancelRef.current = req.cancel;
     void req.promise.then((evals) => {
       if (evals.length === 0) return;

@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  globalRowCol,
   other,
-  replay,
-  rulesFor,
+  replayVariant,
   toRowCol,
-  type GameState,
+  type AnyGame,
   type MoveQuality,
 } from '../engine/index.ts';
 import { useAnalysis } from '../hooks/useAnalysis.ts';
@@ -19,6 +19,8 @@ import { isAiSide, type MatchConfig } from '../state/match.ts';
 import { parseStats, recordGame, type Stats } from '../state/stats.ts';
 import { AnalysisPanel } from './AnalysisPanel.tsx';
 import { Board } from './Board.tsx';
+import { UltimateBoard } from './UltimateBoard.tsx';
+import type { MoveDescription } from './MoveHistory.tsx';
 import { Confetti } from './Confetti.tsx';
 import { LiveAnnouncer } from './LiveAnnouncer.tsx';
 import { MoveHistory } from './MoveHistory.tsx';
@@ -35,14 +37,24 @@ const QUALITY_SYMBOL: Record<MoveQuality, string> = {
   blunder: '??',
 };
 
-function useStatus(config: MatchConfig, game: GameState, aiThinking: boolean): string {
+/** 1-based coordinates of a move: board cells directly, Ultimate on the 9x9 grid. */
+function describeMove(game: AnyGame, move: number): MoveDescription {
+  if (game.kind === 'board') {
+    const [r, c] = toRowCol(move, game.rules.size);
+    return { short: `${String.fromCharCode(97 + c)}${r + 1}`, row: r + 1, col: c + 1 };
+  }
+  const [r, c] = globalRowCol(move);
+  return { short: `${String.fromCharCode(97 + c)}${r + 1}`, row: r + 1, col: c + 1 };
+}
+
+function useStatus(config: MatchConfig, game: AnyGame, aiThinking: boolean): string {
   const t = useT();
   if (game.status === 'draw') return t('status.draw');
   if (game.status === 'won' && game.winner) {
     if (config.mode === 'hva') {
       return game.winner === config.humanSide ? t('status.youWin') : t('status.youLose');
     }
-    if (game.rules.misere) {
+    if (game.kind === 'board' && game.rules.misere) {
       return t('status.misereWin', { loser: other(game.winner), player: game.winner });
     }
     return t('status.win', { player: game.winner });
@@ -58,7 +70,7 @@ export function GameScreen() {
   const t = useT();
   const [stats, setStats] = usePersistedState<Stats>('stats', {}, parseStats);
   const onGameOver = useCallback(
-    (config: MatchConfig, game: GameState) => setStats((s) => recordGame(s, config, game)),
+    (config: MatchConfig, game: AnyGame) => setStats((s) => recordGame(s, config, game)),
     [setStats],
   );
   const m = useMatch(onGameOver);
@@ -95,14 +107,17 @@ export function GameScreen() {
       return;
     }
     const last = match.moves[match.cursor - 1]!;
-    const [row, col] = toRowCol(last, game.rules.size);
+    const { row, col } = describeMove(game, last);
     const mover = other(game.toMove);
     const ai = isAiSide(match.config, mover);
-    let text = t(ai ? 'announce.aiMove' : 'announce.move', {
-      player: mover,
-      row: row + 1,
-      col: col + 1,
-    });
+    let text = t(ai ? 'announce.aiMove' : 'announce.move', { player: mover, row, col });
+    if (game.kind === 'ultimate' && game.status === 'playing') {
+      text +=
+        ' ' +
+        (game.activeBoard === null
+          ? t('ultimate.free')
+          : t('ultimate.sentTo', { n: game.activeBoard + 1 }));
+    }
     if (game.status === 'won' && game.winner) {
       text += ' ' + t('announce.win', { player: game.winner });
       const humanLost = match.config.mode === 'hva' && game.winner !== match.config.humanSide;
@@ -123,7 +138,7 @@ export function GameScreen() {
   // Confetti when a human wins (or anyone wins in two-player mode). Derived from
   // the live end of the move list so browsing history never re-fires it.
   const finalGame = useMemo(
-    () => replay(rulesFor(match.config.variant), match.moves),
+    () => replayVariant(match.config.variant, match.moves),
     [match.config.variant, match.moves],
   );
   const humanWon =
@@ -212,17 +227,37 @@ export function GameScreen() {
         <p className={`status status--${game.status}`} data-testid="status">
           {status}
         </p>
+        {game.kind === 'ultimate' && game.status === 'playing' && (
+          <p className="muted small" data-testid="ultimate-hint">
+            {game.activeBoard === null
+              ? t('ultimate.free')
+              : t('ultimate.sentTo', { n: game.activeBoard + 1 })}
+          </p>
+        )}
         <div className="board-wrap">
-          <Board
-            game={game}
-            name={variantName}
-            interactive={m.humanTurn}
-            onPlay={m.play}
-            invalid={invalid}
-            hint={hint}
-            annotations={boardNotes}
-            gameId={match.gameId}
-          />
+          {game.kind === 'board' ? (
+            <Board
+              game={game}
+              name={variantName}
+              interactive={m.humanTurn}
+              onPlay={m.play}
+              invalid={invalid}
+              hint={hint}
+              annotations={boardNotes}
+              gameId={match.gameId}
+            />
+          ) : (
+            <UltimateBoard
+              game={game}
+              name={variantName}
+              interactive={m.humanTurn}
+              onPlay={m.play}
+              invalid={invalid}
+              hint={hint}
+              annotations={boardNotes}
+              gameId={match.gameId}
+            />
+          )}
           <Confetti burst={burst} colors={CONFETTI_COLORS} />
         </div>
         <div className="controls" role="toolbar" aria-label={t('action.settings')}>
@@ -309,7 +344,7 @@ export function GameScreen() {
         <MoveHistory
           moves={match.moves}
           cursor={match.cursor}
-          size={game.rules.size}
+          describe={(mv) => describeMove(game, mv)}
           onJump={m.jump}
           annotations={historyNotes}
         />

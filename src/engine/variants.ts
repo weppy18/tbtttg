@@ -1,18 +1,27 @@
 import type { Rules } from './types.ts';
 
-/** Board-based variants (Ultimate has its own engine, see ./ultimate). */
-export type VariantId = 'classic' | 'misere' | 'four' | 'five';
+/** Variants played on a single N×N board. */
+export type BoardVariantId = 'classic' | 'misere' | 'four' | 'five';
+/** Every variant, including Ultimate (nine boards, see ./ultimate). */
+export type VariantId = BoardVariantId | 'ultimate';
 
-export const VARIANT_IDS: readonly VariantId[] = ['classic', 'misere', 'four', 'five'];
+export const BOARD_VARIANT_IDS: readonly BoardVariantId[] = ['classic', 'misere', 'four', 'five'];
+export const VARIANT_IDS: readonly VariantId[] = [...BOARD_VARIANT_IDS, 'ultimate'];
 
-export const VARIANT_RULES: Readonly<Record<VariantId, Rules>> = {
+export const VARIANT_RULES: Readonly<Record<BoardVariantId, Rules>> = {
   classic: { size: 3, winLength: 3, misere: false },
   misere: { size: 3, winLength: 3, misere: true },
   four: { size: 4, winLength: 4, misere: false },
   five: { size: 5, winLength: 4, misere: false },
 };
 
+export function isBoardVariant(id: VariantId): id is BoardVariantId {
+  return id !== 'ultimate';
+}
+
+/** Rules for a board variant. @throws for 'ultimate', which has no single-board rules. */
 export function rulesFor(id: VariantId): Rules {
+  if (!isBoardVariant(id)) throw new RangeError('Ultimate has no single-board rules');
   return VARIANT_RULES[id];
 }
 
