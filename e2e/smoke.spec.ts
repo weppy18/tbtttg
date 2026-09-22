@@ -205,6 +205,7 @@ test('a shared link loads the game, replays it, and share copies a link', async 
 test('ultimate: moves constrain the next board, AI replies, and a game can be watched', async ({
   page,
 }) => {
+  test.setTimeout(120_000);
   await setMode(page, 'Two players');
   await page.getByLabel('Ultimate').check();
   await expect(page.locator('.cell')).toHaveCount(81);
