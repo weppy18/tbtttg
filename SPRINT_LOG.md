@@ -13,3 +13,4 @@
 | 0h55m   | Profiles committed. Next: onboarding tour + how-to-play dialog, then PWA icons + Lighthouse                            |
 | 1h02m   | Onboarding committed. Next: PWA icons/manifest polish, Lighthouse run, README                                          |
 | 1h04m | Lighthouse 100x4 committed. Next: PWA update toast + offline badge + error boundary, then README, then NEVER-DONE list |
+| 1h08m | Phases 0-2 complete. NEVER-DONE #1: Playwright play-test 20 games across modes/variants, fix bugs found |
