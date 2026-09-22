@@ -145,3 +145,38 @@ test('theme toggle cycles and persists; language switches to French', async ({ p
   await page.reload();
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Morpion');
 });
+
+test('hint highlights a cell and analysis grades a blunder', async ({ page }) => {
+  await setMode(page, 'Two players');
+  await page.getByTestId('hint').click();
+  await expect(page.locator('.cell--hint')).toHaveCount(1);
+  // X 1,1 / O 2,2 / X 3,3 / O 1,3 (blunder) / X 3,1 / O 2,1 / X 3,2 → X wins
+  const seq: [number, number][] = [
+    [1, 1],
+    [2, 2],
+    [3, 3],
+    [1, 3],
+    [3, 1],
+    [2, 1],
+    [3, 2],
+  ];
+  for (const [r, c] of seq) await cell(page, r, c).click();
+  await expect(status(page)).toHaveText('X wins!');
+  await page.getByTestId('analyse').click();
+  await expect(page.getByTestId('analysis')).toContainText('O: 1 blunder');
+  await expect(page.getByTestId('analysis')).toContainText('X: perfect');
+  await expect(page.getByTestId('history').locator('.cell--blunder')).toHaveCount(1);
+  // jump to the blunder and see the best alternatives outlined
+  await page.getByRole('button', { name: 'Move 4: O at row 1, column 3' }).click();
+  await expect(page.locator('.board .cell--blunder')).toHaveCount(1);
+  await expect(page.locator('.board .cell--best')).toHaveCount(4);
+});
+
+test('sound toggle persists', async ({ page }) => {
+  const toggle = page.getByTestId('sound-toggle');
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+  await page.reload();
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+});

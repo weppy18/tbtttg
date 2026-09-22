@@ -25,6 +25,17 @@ export function Header({ locale }: { locale: Locale }) {
         >
           <span aria-hidden="true">{THEME_ICON[settings.theme]}</span>
         </button>
+        <button
+          type="button"
+          className="icon-btn"
+          onClick={() => update({ sound: !settings.sound })}
+          aria-pressed={settings.sound}
+          aria-label={settings.sound ? t('action.mute') : t('action.unmute')}
+          title={settings.sound ? t('action.mute') : t('action.unmute')}
+          data-testid="sound-toggle"
+        >
+          <span aria-hidden="true">{settings.sound ? '🔊' : '🔇'}</span>
+        </button>
         <label className="select">
           <span className="sr-only">{t('language.label')}</span>
           <select

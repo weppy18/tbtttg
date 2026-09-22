@@ -105,6 +105,19 @@ export const fr: Record<MessageKey, string> = {
   'history.start': 'Début',
   'history.jumpTo': 'Aller au coup {n}',
 
+  'analysis.title': 'Analyse',
+  'analysis.running': 'Analyse en cours…',
+  'analysis.perfect': 'parfait',
+  'analysis.best': 'Meilleur',
+  'analysis.good': 'Bon',
+  'analysis.inaccuracy': 'Imprécision',
+  'analysis.mistake': 'Erreur',
+  'analysis.blunder': 'Gaffe',
+  'analysis.legend':
+    'Parcourez les coups : la case jouée est encadrée selon sa qualité ; les contours verts montrent les meilleures alternatives.',
+  'analysis.playerSummary': '{player} : {summary}',
+  'hint.label': 'Coup suggéré mis en évidence.',
+
   'offline.ready': 'Prêt à jouer hors ligne.',
   'update.available': 'Mise à jour disponible',
   'update.reload': 'Recharger',

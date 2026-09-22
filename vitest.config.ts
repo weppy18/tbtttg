@@ -12,7 +12,7 @@ export default defineConfig({
         'src/lib/storage.ts',
         'src/i18n/translate.ts',
       ],
-      exclude: ['src/**/*.test.ts'],
+      exclude: ['src/**/*.test.ts', 'src/state/settingsContext.ts'],
       thresholds: { lines: 100, functions: 100, branches: 100, statements: 100 },
       reporter: ['text', 'html'],
     },

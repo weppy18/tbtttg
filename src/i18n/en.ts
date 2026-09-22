@@ -113,6 +113,20 @@ export const en = {
   'history.start': 'Start',
   'history.jumpTo': 'Jump to move {n}',
 
+  // Analysis
+  'analysis.title': 'Analysis',
+  'analysis.running': 'Analysing…',
+  'analysis.perfect': 'perfect',
+  'analysis.best': 'Best',
+  'analysis.good': 'Good',
+  'analysis.inaccuracy': 'Inaccuracy',
+  'analysis.mistake': 'Mistake',
+  'analysis.blunder': 'Blunder',
+  'analysis.legend':
+    'Browse the moves: the played cell is outlined by quality; green outlines show the best alternatives.',
+  'analysis.playerSummary': '{player}: {summary}',
+  'hint.label': 'Suggested move highlighted.',
+
   // Misc
   'offline.ready': 'Ready to play offline.',
   'update.available': 'Update available',

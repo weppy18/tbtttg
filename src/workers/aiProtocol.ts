@@ -1,4 +1,10 @@
-import type { Difficulty, MoveEval, SearchOptions, VariantId } from '../engine/index.ts';
+import type {
+  Difficulty,
+  GameAnalysis,
+  MoveEval,
+  SearchOptions,
+  VariantId,
+} from '../engine/index.ts';
 
 export type AiRequest =
   | {
@@ -15,7 +21,10 @@ export type AiRequest =
       variant: VariantId;
       moves: readonly number[];
       options: SearchOptions;
-    };
+    }
+  | { id: number; kind: 'analyse'; variant: VariantId; moves: readonly number[] };
 
 export type AiResponse =
-  { id: number; kind: 'move'; index: number } | { id: number; kind: 'evaluate'; evals: MoveEval[] };
+  | { id: number; kind: 'move'; index: number }
+  | { id: number; kind: 'evaluate'; evals: MoveEval[] }
+  | { id: number; kind: 'analyse'; analysis: GameAnalysis };

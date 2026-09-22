@@ -649,3 +649,18 @@ button {
     stroke-dashoffset: 0;
   }
 }
+
+/* ---------- Analysis ---------- */
+.analysis {
+  width: min(100%, 88vmin, 520px);
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.analysis__line {
+  font-weight: 600;
+}

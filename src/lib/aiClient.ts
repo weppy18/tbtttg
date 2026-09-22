@@ -1,15 +1,12 @@
-import {
-  chooseMove,
-  evaluateMoves,
-  replay,
-  rulesFor,
-  seededRng,
-  type Difficulty,
-  type MoveEval,
-  type SearchOptions,
-  type VariantId,
+import type {
+  Difficulty,
+  GameAnalysis,
+  MoveEval,
+  SearchOptions,
+  VariantId,
 } from '../engine/index.ts';
 import type { AiRequest, AiResponse } from '../workers/aiProtocol.ts';
+import { runAiRequest } from './aiRunner.ts';
 
 /**
  * Runs AI searches off the main thread so deep searches on big boards never
@@ -17,6 +14,7 @@ import type { AiRequest, AiResponse } from '../workers/aiProtocol.ts';
  * unavailable (tests, ancient browsers). Stale responses (after cancel) are ignored.
  */
 interface Pending {
+  request: AiRequest;
   resolve: (r: AiResponse) => void;
 }
 
@@ -38,10 +36,10 @@ function getWorker(): Worker | null {
         p.resolve(e.data);
       };
       worker.onerror = () => {
-        // Worker died: fall back to sync mode for the rest of the session.
+        // Worker died: answer everything in flight on the main thread and stay there.
         worker?.terminate();
         worker = null;
-        for (const [, p] of pending) p.resolve({ id: -1, kind: 'move', index: -1 });
+        for (const [, p] of pending) p.resolve(runAiRequest(p.request));
         pending.clear();
       };
     }
@@ -53,23 +51,11 @@ function getWorker(): Worker | null {
 
 function send(req: AiRequest): Promise<AiResponse> {
   const w = getWorker();
-  if (!w) return Promise.resolve(runSync(req));
+  if (!w) return Promise.resolve(runAiRequest(req));
   return new Promise((resolve) => {
-    pending.set(req.id, { resolve });
+    pending.set(req.id, { request: req, resolve });
     w.postMessage(req);
   });
-}
-
-function runSync(req: AiRequest): AiResponse {
-  const state = replay(rulesFor(req.variant), req.moves);
-  if (req.kind === 'move') {
-    return {
-      id: req.id,
-      kind: 'move',
-      index: chooseMove(state, req.difficulty, seededRng(req.seed)),
-    };
-  }
-  return { id: req.id, kind: 'evaluate', evals: evaluateMoves(state, req.options) };
 }
 
 export interface Cancellable<T> {
@@ -94,9 +80,7 @@ export function requestMove(
 ): Cancellable<number> {
   const id = nextId++;
   const p = send({ id, kind: 'move', variant, moves, difficulty, seed }).then((r) =>
-    r.kind === 'move' && r.index >= 0
-      ? r.index
-      : chooseMove(replay(rulesFor(variant), moves), difficulty, seededRng(seed)),
+    r.kind === 'move' ? r.index : -1,
   );
   return cancellable(id, p);
 }
@@ -108,7 +92,18 @@ export function requestEvaluation(
 ): Cancellable<MoveEval[]> {
   const id = nextId++;
   const p = send({ id, kind: 'evaluate', variant, moves, options }).then((r) =>
-    r.kind === 'evaluate' ? r.evals : evaluateMoves(replay(rulesFor(variant), moves), options),
+    r.kind === 'evaluate' ? r.evals : [],
+  );
+  return cancellable(id, p);
+}
+
+export function requestAnalysis(
+  variant: VariantId,
+  moves: readonly number[],
+): Cancellable<GameAnalysis | null> {
+  const id = nextId++;
+  const p = send({ id, kind: 'analyse', variant, moves }).then((r) =>
+    r.kind === 'analyse' ? r.analysis : null,
   );
   return cancellable(id, p);
 }

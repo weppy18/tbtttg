@@ -1,11 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { other, replay, rulesFor, toRowCol, type GameState } from '../engine/index.ts';
+import {
+  other,
+  replay,
+  rulesFor,
+  toRowCol,
+  type GameState,
+  type MoveQuality,
+} from '../engine/index.ts';
+import { useAnalysis } from '../hooks/useAnalysis.ts';
 import { useAnnouncer } from '../hooks/useAnnouncer.ts';
 import { useMatch } from '../hooks/useMatch.ts';
 import { usePersistedState } from '../hooks/usePersistedState.ts';
 import { useT } from '../i18n/index.ts';
+import { playSound } from '../lib/sound.ts';
 import { isAiSide, type MatchConfig } from '../state/match.ts';
 import { parseStats, recordGame, type Stats } from '../state/stats.ts';
+import { AnalysisPanel } from './AnalysisPanel.tsx';
 import { Board } from './Board.tsx';
 import { Confetti } from './Confetti.tsx';
 import { LiveAnnouncer } from './LiveAnnouncer.tsx';
@@ -14,6 +24,14 @@ import { Scoreboard } from './Scoreboard.tsx';
 import { SetupPanel } from './SetupPanel.tsx';
 
 const CONFETTI_COLORS = ['#38bdf8', '#fb7185', '#fbbf24', '#34d399', '#a78bfa'];
+
+const QUALITY_SYMBOL: Record<MoveQuality, string> = {
+  best: '',
+  good: '',
+  inaccuracy: '?!',
+  mistake: '?',
+  blunder: '??',
+};
 
 function useStatus(config: MatchConfig, game: GameState, aiThinking: boolean): string {
   const t = useT();
@@ -45,16 +63,33 @@ export function GameScreen() {
   const { match, game, undo, redo, newGame } = m;
   const { announce, message, nonce } = useAnnouncer();
   const status = useStatus(match.config, game, m.aiThinking);
+  const { hint, requestHint, analysis, analysing, analyse } = useAnalysis(
+    match.config.variant,
+    match.gameId,
+    match.moves,
+    match.cursor,
+  );
 
-  // Announce every move and result for screen readers.
-  const announcedRef = useRef<{ gameId: number; cursor: number }>({ gameId: -1, cursor: -1 });
+  // Announce every move and result for screen readers, and play the matching sound.
+  const seenRef = useRef<{ gameId: number; cursor: number }>({ gameId: -1, cursor: -1 });
   useEffect(() => {
-    const prev = announcedRef.current;
+    const prev = seenRef.current;
     if (prev.gameId === match.gameId && prev.cursor === match.cursor) return;
-    announcedRef.current = { gameId: match.gameId, cursor: match.cursor };
+    const firstRender = prev.gameId === -1;
+    seenRef.current = { gameId: match.gameId, cursor: match.cursor };
+    if (firstRender) return;
+    const sameGame = prev.gameId === match.gameId;
     if (match.cursor === 0) {
-      if (prev.gameId !== match.gameId) announce(t('announce.newGame', { player: 'X' }));
-      else if (prev.cursor > 0) announce(t('announce.undo'));
+      if (!sameGame) announce(t('announce.newGame', { player: 'X' }));
+      else if (prev.cursor > 0) {
+        announce(t('announce.undo'));
+        playSound('undo');
+      }
+      return;
+    }
+    if (sameGame && match.cursor < prev.cursor) {
+      announce(t('announce.undo'));
+      playSound('undo');
       return;
     }
     const last = match.moves[match.cursor - 1]!;
@@ -66,11 +101,22 @@ export function GameScreen() {
       row: row + 1,
       col: col + 1,
     });
-    if (game.status === 'won' && game.winner)
+    if (game.status === 'won' && game.winner) {
       text += ' ' + t('announce.win', { player: game.winner });
-    if (game.status === 'draw') text += ' ' + t('announce.draw');
+      const humanLost = match.config.mode === 'hva' && game.winner !== match.config.humanSide;
+      playSound(humanLost ? 'lose' : 'win');
+    } else if (game.status === 'draw') {
+      text += ' ' + t('announce.draw');
+      playSound('draw');
+    } else {
+      playSound(mover === 'X' ? 'place-x' : 'place-o');
+    }
     announce(text);
   }, [match.gameId, match.cursor, match.moves, match.config, game, announce, t]);
+
+  useEffect(() => {
+    if (match.invalid) playSound('invalid');
+  }, [match.invalid]);
 
   // Confetti when a human wins (or anyone wins in two-player mode). Derived from
   // the live end of the move list so browsing history never re-fires it.
@@ -84,7 +130,7 @@ export function GameScreen() {
       (match.config.mode === 'hva' && finalGame.winner === match.config.humanSide));
   const burst = humanWon ? match.gameId * 100 + match.moves.length : null;
 
-  // Global shortcuts: U undo, R redo, N new game.
+  // Global shortcuts: U undo, R redo, N new game, H hint.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
@@ -95,18 +141,42 @@ export function GameScreen() {
         target.getAttribute('type') !== 'radio'
       )
         return;
-      if (e.key === 'u' || e.key === 'U') undo();
-      else if (e.key === 'r' || e.key === 'R') redo();
-      else if (e.key === 'n' || e.key === 'N') newGame();
+      const k = e.key.toLowerCase();
+      if (k === 'u') undo();
+      else if (k === 'r') redo();
+      else if (k === 'n') newGame();
+      else if (k === 'h' && m.humanTurn) requestHint();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [undo, redo, newGame]);
+  }, [undo, redo, newGame, requestHint, m.humanTurn]);
 
   const invalid = useMemo(
     () => (match.invalid ? { index: match.invalid.index, nonce: match.invalid.nonce } : null),
     [match.invalid],
   );
+
+  // Analysis annotations for the board (at the current cursor) and the move list.
+  const boardNotes = useMemo(() => {
+    const map = new Map<number, string>();
+    if (!analysis || match.cursor === 0) return map;
+    const report = analysis.moves[match.cursor - 1];
+    if (!report) return map;
+    map.set(report.index, `cell--${report.quality}`);
+    if (report.quality !== 'best') for (const b of report.bestMoves) map.set(b, 'cell--best');
+    return map;
+  }, [analysis, match.cursor]);
+  const historyNotes = useMemo(() => {
+    const map = new Map<number, { cls: string; label: string }>();
+    if (!analysis) return map;
+    analysis.moves.forEach((r) => {
+      if (r.quality !== 'best' && r.quality !== 'good') {
+        map.set(r.ply, { cls: `cell--${r.quality}`, label: QUALITY_SYMBOL[r.quality] });
+      }
+    });
+    return map;
+  }, [analysis]);
+
   const variantName = t(`variant.${match.config.variant}`);
   const over = game.status !== 'playing';
 
@@ -124,6 +194,8 @@ export function GameScreen() {
             interactive={m.humanTurn}
             onPlay={m.play}
             invalid={invalid}
+            hint={hint}
+            annotations={boardNotes}
             gameId={match.gameId}
           />
           <Confetti burst={burst} colors={CONFETTI_COLORS} />
@@ -159,7 +231,31 @@ export function GameScreen() {
           >
             {t('action.redo')}
           </button>
+          {!over && (
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={requestHint}
+              disabled={!m.humanTurn}
+              aria-pressed={hint !== null}
+              data-testid="hint"
+            >
+              {t('action.hint')}
+            </button>
+          )}
+          {finalGame.status !== 'playing' && !analysis && (
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={analyse}
+              disabled={analysing}
+              data-testid="analyse"
+            >
+              {analysing ? t('analysis.running') : t('action.analyse')}
+            </button>
+          )}
         </div>
+        {analysis && <AnalysisPanel analysis={analysis} />}
         <p className="muted small">{t('keyboard.help')}</p>
       </section>
       <aside className="game__side">
@@ -170,6 +266,7 @@ export function GameScreen() {
           cursor={match.cursor}
           size={game.rules.size}
           onJump={m.jump}
+          annotations={historyNotes}
         />
       </aside>
     </div>
