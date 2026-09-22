@@ -41,7 +41,7 @@ export default defineConfig({
     react(),
     inlineCss(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       includeAssets: ['favicon.svg', 'icons/*.png'],
       manifest: {
         name: 'Tic-Tac-Toe: The Game',

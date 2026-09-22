@@ -12,3 +12,4 @@
 | 0h49m   | Ultimate integrated + e2e green. Next: player profiles (names/colors/marks), then onboarding + PWA/Lighthouse          |
 | 0h55m   | Profiles committed. Next: onboarding tour + how-to-play dialog, then PWA icons + Lighthouse                            |
 | 1h02m   | Onboarding committed. Next: PWA icons/manifest polish, Lighthouse run, README                                          |
+| 1h04m | Lighthouse 100x4 committed. Next: PWA update toast + offline badge + error boundary, then README, then NEVER-DONE list |

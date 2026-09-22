@@ -272,3 +272,24 @@ test('player profiles: names show in status, custom marks render, and persist', 
     page.getByTestId('players').getByRole('button', { name: '🐱' }).first(),
   ).toHaveAttribute('aria-pressed', 'true');
 });
+
+test('offline badge appears when the connection drops', async ({ page, context }) => {
+  await context.setOffline(true);
+  await page.evaluate(() => window.dispatchEvent(new Event('offline')));
+  await expect(page.getByTestId('offline')).toBeVisible();
+  await context.setOffline(false);
+  await page.evaluate(() => window.dispatchEvent(new Event('online')));
+  await expect(page.getByTestId('offline')).toBeHidden();
+});
+
+test('service worker registers and the app loads from cache offline', async ({ page, context }) => {
+  test.skip(test.info().project.name !== 'chromium', 'service workers are checked once');
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  await page.reload(); // the first controlled load
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  await context.setOffline(true);
+  await page.reload();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Tic-Tac-Toe');
+  await expect(page.locator('.cell')).toHaveCount(9);
+  await context.setOffline(false);
+});

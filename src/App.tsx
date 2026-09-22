@@ -2,6 +2,8 @@ import { useEffect, type CSSProperties } from 'react';
 import { GameScreen } from './components/GameScreen.tsx';
 import { Header } from './components/Header.tsx';
 import { Tour } from './components/Tour.tsx';
+import { PwaStatus } from './components/PwaStatus.tsx';
+import { ErrorBoundary } from './components/ErrorBoundary.tsx';
 import { useTheme } from './hooks/useTheme.ts';
 import { I18nProvider } from './i18n/I18nProvider.tsx';
 import { detectLocale } from './i18n/index.ts';
@@ -43,6 +45,7 @@ function Shell() {
         <main className="main">
           <GameScreen />
         </main>
+        <PwaStatus />
       </div>
     </I18nProvider>
   );
@@ -50,10 +53,12 @@ function Shell() {
 
 export function App() {
   return (
-    <SettingsProvider>
-      <ProfilesProvider>
-        <Shell />
-      </ProfilesProvider>
-    </SettingsProvider>
+    <ErrorBoundary>
+      <SettingsProvider>
+        <ProfilesProvider>
+          <Shell />
+        </ProfilesProvider>
+      </SettingsProvider>
+    </ErrorBoundary>
   );
 }
