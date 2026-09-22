@@ -1,52 +1,31 @@
-import { useState } from 'react';
-import { applyMove, createGame, isLegalMove, type GameState } from './engine/index.ts';
+import { GameScreen } from './components/GameScreen.tsx';
+import { Header } from './components/Header.tsx';
+import { useTheme } from './hooks/useTheme.ts';
+import { I18nProvider } from './i18n/I18nProvider.tsx';
+import { detectLocale } from './i18n/index.ts';
+import { SettingsProvider } from './state/SettingsProvider.tsx';
+import { useSettings } from './state/settingsContext.ts';
 
-function statusText(state: GameState): string {
-  if (state.status === 'won') return `${state.winner} wins!`;
-  if (state.status === 'draw') return "It's a draw.";
-  return `${state.toMove} to move`;
+function Shell() {
+  const { settings } = useSettings();
+  useTheme(settings.theme);
+  const locale = settings.locale ?? detectLocale(navigator.languages ?? [navigator.language]);
+  return (
+    <I18nProvider locale={locale}>
+      <div className="app" lang={locale}>
+        <Header locale={locale} />
+        <main className="main">
+          <GameScreen />
+        </main>
+      </div>
+    </I18nProvider>
+  );
 }
 
 export function App() {
-  const [game, setGame] = useState<GameState>(() => createGame());
-
-  const play = (index: number) => {
-    if (!isLegalMove(game, index)) return;
-    setGame(applyMove(game, index));
-  };
-
   return (
-    <main className="app">
-      <h1>Tic-Tac-Toe</h1>
-      <p className="status" role="status" aria-live="polite">
-        {statusText(game)}
-      </p>
-      <div
-        className="board"
-        role="grid"
-        aria-label="Tic-Tac-Toe board"
-        style={{ '--size': game.rules.size } as React.CSSProperties}
-      >
-        {game.board.map((cell, i) => {
-          const winning = game.winningLine?.includes(i) ?? false;
-          return (
-            <button
-              key={i}
-              type="button"
-              className={`cell${winning ? ' cell--win' : ''}`}
-              data-mark={cell ?? ''}
-              onClick={() => play(i)}
-              disabled={game.status !== 'playing' || cell !== null}
-              aria-label={`Cell ${i + 1}${cell ? `, ${cell}` : ', empty'}`}
-            >
-              {cell}
-            </button>
-          );
-        })}
-      </div>
-      <button type="button" className="btn" onClick={() => setGame(createGame())}>
-        Restart
-      </button>
-    </main>
+    <SettingsProvider>
+      <Shell />
+    </SettingsProvider>
   );
 }

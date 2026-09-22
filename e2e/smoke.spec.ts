@@ -1,22 +1,147 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
-const cell = (page: import('@playwright/test').Page, n: number) =>
-  page.getByRole('button', { name: new RegExp(`^Cell ${n},`) });
+const cell = (page: Page, row: number, col: number) =>
+  page.getByRole('button', { name: new RegExp(`^Row ${row}, column ${col},`) });
+const status = (page: Page) => page.getByTestId('status');
 
-test('two local players can play to a win and restart', async ({ page }) => {
+async function setMode(page: Page, mode: 'Two players' | 'Versus AI' | 'Watch AI vs AI') {
+  await page.getByLabel(mode).check();
+}
+
+test.beforeEach(async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: /tic-tac-toe/i })).toBeVisible();
-  await expect(page.getByRole('status')).toContainText('X to move');
-
-  for (const n of [1, 4, 2, 5, 3]) await cell(page, n).click();
-
-  await expect(page.getByRole('status')).toContainText('X wins');
-  await page.getByRole('button', { name: 'Restart' }).click();
-  await expect(page.getByRole('status')).toContainText('X to move');
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
 });
 
-test('draw is detected', async ({ page }) => {
-  await page.goto('/');
-  for (const n of [1, 2, 3, 5, 4, 6, 8, 7, 9]) await cell(page, n).click();
-  await expect(page.getByRole('status')).toContainText('draw');
+test('two local players can play to a win and restart', async ({ page }) => {
+  await setMode(page, 'Two players');
+  await expect(status(page)).toHaveText('X to move');
+
+  await cell(page, 1, 1).click();
+  await cell(page, 2, 1).click();
+  await cell(page, 1, 2).click();
+  await cell(page, 2, 2).click();
+  await cell(page, 1, 3).click();
+
+  await expect(status(page)).toHaveText('X wins!');
+  await expect(page.locator('.cell--win')).toHaveCount(3);
+  await expect(page.locator('.board__line')).toBeVisible();
+  await page.getByRole('button', { name: 'Play again' }).click();
+  await expect(status(page)).toHaveText('X to move');
+  await expect(page.locator('[data-mark="X"]')).toHaveCount(0);
+});
+
+test('draw is detected and recorded in the scoreboard', async ({ page }) => {
+  await setMode(page, 'Two players');
+  const order: [number, number][] = [
+    [1, 1],
+    [1, 2],
+    [1, 3],
+    [2, 2],
+    [2, 1],
+    [2, 3],
+    [3, 2],
+    [3, 1],
+    [3, 3],
+  ];
+  for (const [r, c] of order) await cell(page, r, c).click();
+  await expect(status(page)).toHaveText('Draw.');
+  await expect(page.getByTestId('scoreboard')).toContainText('Draws');
+  await expect(page.getByTestId('scoreboard').locator('.stat--draw dd')).toHaveText('1');
+});
+
+test('clicking a taken cell shakes the board and changes nothing', async ({ page }) => {
+  await setMode(page, 'Two players');
+  await cell(page, 2, 2).click();
+  await cell(page, 2, 2).click({ force: true }); // aria-disabled, so force the click
+  await expect(status(page)).toHaveText('O to move');
+  await expect(page.getByTestId('board')).toHaveCSS('animation-name', /board-shake/);
+});
+
+test('versus AI: the AI replies and undo returns to the human turn', async ({ page }) => {
+  await setMode(page, 'Versus AI');
+  await page.getByLabel('Impossible').check();
+  await expect(status(page)).toHaveText('Your turn (X)');
+  await cell(page, 2, 2).click();
+  await expect(page.locator('[data-mark="O"]')).toHaveCount(1, { timeout: 5000 });
+  await expect(status(page)).toHaveText('Your turn (X)');
+
+  await page.getByTestId('undo').click();
+  await expect(page.locator('[data-mark]:not([data-mark=""])')).toHaveCount(0);
+  await expect(status(page)).toHaveText('Your turn (X)');
+  await page.getByTestId('redo').click();
+  await expect(page.locator('[data-mark="O"]')).toHaveCount(1);
+});
+
+test('versus AI as O: the AI opens', async ({ page }) => {
+  await setMode(page, 'Versus AI');
+  await page.getByLabel('O (second)').check();
+  await expect(page.locator('[data-mark="X"]')).toHaveCount(1, { timeout: 5000 });
+  await expect(status(page)).toHaveText('Your turn (O)');
+});
+
+test('impossible AI cannot be beaten in a scripted attempt', async ({ page }) => {
+  await setMode(page, 'Versus AI');
+  await page.getByLabel('Impossible').check();
+  // Play greedily: always the first empty cell. The AI must not lose.
+  for (let i = 0; i < 5; i++) {
+    const empty = page.locator('.cell--empty:not([aria-disabled="true"])').first();
+    if ((await empty.count()) === 0) break;
+    await empty.click();
+    await page.waitForTimeout(700);
+  }
+  await expect(status(page)).not.toHaveText('You win!');
+});
+
+test('AI vs AI plays a whole game by itself', async ({ page }) => {
+  await setMode(page, 'Watch AI vs AI');
+  await expect(status(page)).toHaveText(/wins|Draw/, { timeout: 15000 });
+});
+
+test('keyboard: arrows + Enter and digit keys place marks', async ({ page }) => {
+  await setMode(page, 'Two players');
+  await cell(page, 1, 1).focus();
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  await expect(cell(page, 2, 2)).toHaveAttribute('data-mark', 'X');
+  await page.keyboard.press('1');
+  await expect(cell(page, 1, 1)).toHaveAttribute('data-mark', 'O');
+  await page.keyboard.press('u');
+  await expect(cell(page, 1, 1)).toHaveAttribute('data-mark', '');
+});
+
+test('screen reader announcements are made for moves', async ({ page }) => {
+  await setMode(page, 'Two players');
+  await cell(page, 1, 1).click();
+  await expect(page.getByTestId('announcer')).toContainText('X played row 1, column 1.');
+});
+
+test('variants: 5x5 board renders 25 cells and misère flips the result', async ({ page }) => {
+  await setMode(page, 'Two players');
+  await page.getByLabel('5×5').check();
+  await expect(page.locator('.cell')).toHaveCount(25);
+  await page.getByLabel('Misère 3×3').check();
+  await cell(page, 1, 1).click();
+  await cell(page, 2, 1).click();
+  await cell(page, 1, 2).click();
+  await cell(page, 2, 2).click();
+  await cell(page, 1, 3).click();
+  await expect(status(page)).toHaveText('X completed a line — O wins!');
+});
+
+test('theme toggle cycles and persists; language switches to French', async ({ page }) => {
+  const html = page.locator('html');
+  await page.getByTestId('theme-toggle').click(); // system -> light
+  await expect(html).toHaveAttribute('data-theme', 'light');
+  await page.getByTestId('theme-toggle').click(); // light -> dark
+  await expect(html).toHaveAttribute('data-theme', 'dark');
+  await page.reload();
+  await expect(html).toHaveAttribute('data-theme', 'dark');
+
+  await page.getByTestId('language-select').selectOption('fr');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Morpion');
+  await page.reload();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Morpion');
 });
